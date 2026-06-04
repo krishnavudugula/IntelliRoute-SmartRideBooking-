@@ -344,6 +344,17 @@
             color: #101A26;
         }
 
+        .cancelled-notice {
+            width: 100%;
+            border: 1px solid rgba(255, 182, 193, 0.18);
+            border-radius: 10px;
+            padding: 12px 14px;
+            background: rgba(58, 31, 36, 0.72);
+            color: #FFB6C1;
+            font-weight: 900;
+            text-align: center;
+        }
+
         .otp-row {
             display: flex;
             gap: 10px;
@@ -668,6 +679,7 @@ function rideCardTemplate(ride) {
     const fare = money(ride.total_fare);
     const safety = ride.road_analysis ? `${ride.road_analysis.safety_score}%` : '--';
     const cardClass = ride.status === 'searching' ? 'ride-card request' : 'ride-card active-trip';
+    const statusLabel = ride.status === 'cancelled' ? 'cancelled by rider' : ride.status.replace('_', ' ');
     let actionHTML = '';
 
     if (ride.status === 'searching' || ride.status === 'requested') {
@@ -684,13 +696,15 @@ function rideCardTemplate(ride) {
         `;
     } else if (ride.status === 'in_progress') {
         actionHTML = `<button class="btn-action btn-complete" onclick="handleCompleteRide(${ride.id})">Complete Ride</button>`;
+    } else if (ride.status === 'cancelled') {
+        actionHTML = `<div class="cancelled-notice">Rider cancelled this trip. You can wait for the next request.</div>`;
     }
 
     return `
         <article class="${cardClass}">
             <div class="ride-top">
                 <div class="ride-code">${ride.ride_id}</div>
-                <div class="ride-status">${ride.status.replace('_', ' ')}</div>
+                <div class="ride-status">${statusLabel}</div>
             </div>
             <div class="ride-route">
                 <div class="route-line"><strong>Pickup</strong><span>${ride.pickup_address}</span></div>

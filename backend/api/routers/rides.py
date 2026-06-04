@@ -77,6 +77,7 @@ def _driver_payload(driver: Optional[Driver]) -> Optional[dict]:
         "total_rides": driver.total_rides or 0,
         "total_earnings": _decimal(driver.total_earnings),
         "is_verified": bool(driver.is_verified),
+        "vehicle_type": normalize_vehicle_type(driver.vehicle_type),
         "vehicle_number": driver.vehicle_number or "Profile pending",
         "vehicle_model": driver.vehicle_model or driver.vehicle_type.title(),
         "vehicle_color": driver.vehicle_color or "White",

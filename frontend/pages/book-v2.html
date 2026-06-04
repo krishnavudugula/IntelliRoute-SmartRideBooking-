@@ -230,8 +230,106 @@
             text-transform: uppercase;
         }
 
+        .ride-live-card {
+            margin-top: 12px;
+            border: 1px solid #DDE6ED;
+            border-radius: 12px;
+            background: #F8FAFC;
+            padding: 14px;
+        }
+
+        .ride-live-card h3 {
+            margin: 0;
+            color: #1E405E;
+            font-size: 18px;
+        }
+
+        .ride-live-card p {
+            margin: 5px 0 0;
+            color: #5E6D7D;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .searching-dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 13px;
+        }
+
+        .searching-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #1F7B6D;
+            animation: searchingPulse 1.1s ease-in-out infinite;
+        }
+
+        .searching-dots span:nth-child(2) {
+            animation-delay: 0.16s;
+        }
+
+        .searching-dots span:nth-child(3) {
+            animation-delay: 0.32s;
+        }
+
+        @keyframes searchingPulse {
+            0%, 100% { opacity: 0.35; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-4px); }
+        }
+
+        .journey-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .journey-step {
+            border-radius: 9px;
+            padding: 9px 8px;
+            background: #EEF3F7;
+            color: #5E6D7D;
+            font-size: 11px;
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .journey-step.active {
+            background: #1E405E;
+            color: #ffffff;
+        }
+
+        .route-confirmation {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .confirm-row {
+            border: 1px solid #E3E9EE;
+            border-radius: 9px;
+            padding: 10px 11px;
+            background: #ffffff;
+        }
+
+        .confirm-row span {
+            display: block;
+            color: #6B7280;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .confirm-row strong {
+            display: block;
+            margin-top: 4px;
+            color: #1D2735;
+            font-size: 13px;
+        }
+
         .otp-card {
-            display: none;
             margin-top: 14px;
             padding: 16px;
             border-radius: 10px;
@@ -500,6 +598,21 @@
         <section class="status-panel" id="status-panel">
             <div class="step-pill">Step 3 - Ride status</div>
             <span class="ride-status-pill" id="ride-status-pill">Searching</span>
+            <div class="ride-live-card" id="ride-live-card">
+                <h3 id="ride-status-title">Searching for driver</h3>
+                <p id="ride-status-copy">Your selected pickup and drop are confirmed. Matching nearby drivers now.</p>
+                <div class="searching-dots" id="searching-dots"><span></span><span></span><span></span></div>
+                <div class="journey-steps">
+                    <div class="journey-step" id="step-searching">Searching</div>
+                    <div class="journey-step" id="step-arriving">Arriving</div>
+                    <div class="journey-step" id="step-trip">Trip</div>
+                </div>
+                <div class="route-confirmation">
+                    <div class="confirm-row"><span>Pickup confirmed</span><strong id="confirm-pickup">--</strong></div>
+                    <div class="confirm-row"><span>Drop confirmed</span><strong id="confirm-drop">--</strong></div>
+                    <div class="confirm-row"><span>Road analysis</span><strong id="confirm-analysis">--</strong></div>
+                </div>
+            </div>
             <div class="metric-list">
                 <div class="metric-row"><span>Pickup</span><strong id="ride-pickup">--</strong></div>
                 <div class="metric-row"><span>Drop</span><strong id="ride-drop">--</strong></div>
@@ -560,9 +673,11 @@ let currentRide = null;
 let pollingInterval = null;
 let simulationTimer = null;
 let simulationStartedForRide = null;
+let autoCompleteScheduledForRide = null;
 let rideMap = null;
 let routeLayer = null;
 let vehicleMarker = null;
+let lastDrawnRouteKey = null;
 
 function money(value) {
     return `Rs ${Number(value || 0).toFixed(2)}`;
@@ -572,6 +687,83 @@ function setError(message) {
     const error = document.getElementById('booking-error');
     error.textContent = message || '';
     error.classList.toggle('show', Boolean(message));
+}
+
+function rideStage(status) {
+    if (status === 'searching') return 'searching';
+    if (status === 'accepted' || status === 'arriving' || status === 'arrived') return 'arriving';
+    if (status === 'in_progress' || status === 'completed') return 'trip';
+    return 'searching';
+}
+
+function statusPresentation(ride) {
+    const driverName = ride.driver && ride.driver.user
+        ? (ride.driver.user.first_name || ride.driver.user.username || 'Driver')
+        : 'a nearby driver';
+
+    const copy = {
+        searching: {
+            label: 'Searching for driver',
+            title: 'Searching for driver',
+            body: 'Your pickup and drop are confirmed. We are scanning matching drivers for this vehicle type.'
+        },
+        accepted: {
+            label: 'Driver is arriving',
+            title: 'Driver is arriving',
+            body: `${driverName} accepted your ride. Keep the OTP ready for the driver to start the trip.`
+        },
+        arriving: {
+            label: 'Driver is arriving',
+            title: 'Driver is arriving',
+            body: `${driverName} is on the way to your pickup point.`
+        },
+        arrived: {
+            label: 'Driver arrived',
+            title: 'Driver arrived',
+            body: 'Share the OTP with the driver to start the ride.'
+        },
+        in_progress: {
+            label: 'Trip in progress',
+            title: 'Trip in progress',
+            body: 'Prototype simulation is moving from pickup to drop using the selected route analysis.'
+        },
+        completed: {
+            label: 'Ride completed',
+            title: 'Ride completed',
+            body: 'Trip completed successfully. Review the final distance, time, fare, and safety score below.'
+        },
+        cancelled: {
+            label: 'Ride cancelled',
+            title: 'Ride cancelled',
+            body: 'This ride request was cancelled. You can choose another route and request again.'
+        }
+    };
+
+    return copy[ride.status] || copy.searching;
+}
+
+function setTripControlsLocked(locked) {
+    document.getElementById('pickup-location').disabled = locked;
+    document.getElementById('drop-location').disabled = locked;
+    document.getElementById('estimate-btn').disabled = locked;
+    document.querySelectorAll('.vehicle-btn').forEach(button => {
+        button.disabled = locked;
+    });
+    document.getElementById('request-btn').style.display = locked ? 'none' : 'block';
+}
+
+function setJourneySteps(status) {
+    const stage = rideStage(status);
+    document.getElementById('step-searching').classList.toggle('active', stage === 'searching');
+    document.getElementById('step-arriving').classList.toggle('active', stage === 'arriving');
+    document.getElementById('step-trip').classList.toggle('active', stage === 'trip');
+}
+
+function routeKey(route, pickupLabel, dropLabel) {
+    if (!route || !route.length) return '';
+    const first = route[0];
+    const last = route[route.length - 1];
+    return `${pickupLabel}|${dropLabel}|${route.length}|${first.latitude},${first.longitude}|${last.latitude},${last.longitude}`;
 }
 
 function initMap() {
@@ -680,7 +872,7 @@ async function handleEstimate() {
         document.getElementById('estimate-btn').disabled = true;
         currentEstimate = await estimateRide(estimateRequest);
         renderEstimate(currentEstimate);
-        drawLeafletRoute(currentEstimate.route_coordinates, currentEstimate.pickup.name, currentEstimate.drop.name);
+        drawLeafletRoute(currentEstimate.route_coordinates, currentEstimate.pickup.name, currentEstimate.drop.name, { force: true });
     } catch (error) {
         setError(error.message);
     } finally {
@@ -719,11 +911,20 @@ function renderAnalysis(analysis) {
     `).join('');
 }
 
-function drawLeafletRoute(route, pickupLabel, dropLabel) {
+function drawLeafletRoute(route, pickupLabel, dropLabel, options = {}) {
     initMap();
+    if (!rideMap || !routeLayer) return;
+
+    const nextRouteKey = routeKey(route, pickupLabel, dropLabel);
+    if (!options.force && nextRouteKey && nextRouteKey === lastDrawnRouteKey && routeLayer.getLayers().length) {
+        document.getElementById('map-hint').textContent = `${pickupLabel} to ${dropLabel}`;
+        return;
+    }
+
     routeLayer.clearLayers();
     if (simulationTimer) clearInterval(simulationTimer);
     vehicleMarker = null;
+    lastDrawnRouteKey = nextRouteKey;
 
     if (!route || route.length < 2) {
         document.getElementById('map-hint').textContent = 'Select a route to draw it on OpenStreetMap.';
@@ -775,6 +976,7 @@ async function requestRide() {
         document.getElementById('request-btn').disabled = true;
         currentRide = await createRide(getSelectedLocations());
         document.getElementById('status-panel').classList.add('show');
+        setTripControlsLocked(true);
         renderRide(currentRide);
         startPolling();
     } catch (error) {
@@ -807,11 +1009,26 @@ async function refreshRideStatus() {
 }
 
 function renderRide(ride) {
+    const presentation = statusPresentation(ride);
+    const activeTrip = ['searching', 'accepted', 'arriving', 'arrived', 'in_progress'].includes(ride.status);
+
     document.getElementById('status-panel').classList.add('show');
-    document.getElementById('ride-status-pill').textContent = ride.status.replace('_', ' ').toUpperCase();
+    document.getElementById('ride-status-pill').textContent = presentation.label.toUpperCase();
+    document.getElementById('ride-status-title').textContent = presentation.title;
+    document.getElementById('ride-status-copy').textContent = presentation.body;
+    document.getElementById('searching-dots').style.display = ['searching', 'accepted', 'arriving'].includes(ride.status) ? 'flex' : 'none';
+    setJourneySteps(ride.status);
+    setTripControlsLocked(activeTrip);
+
     document.getElementById('ride-pickup').textContent = ride.pickup_address;
     document.getElementById('ride-drop').textContent = ride.drop_address;
     document.getElementById('ride-fare').textContent = money(ride.total_fare);
+    document.getElementById('confirm-pickup').textContent = ride.pickup_address;
+    document.getElementById('confirm-drop').textContent = ride.drop_address;
+    document.getElementById('confirm-analysis').textContent = ride.road_analysis
+        ? `${ride.road_analysis.safety_score}% safety - ${ride.road_analysis.traffic_density} traffic - ${ride.road_analysis.road_condition} road`
+        : 'Road analysis locked for this ride';
+
     updateCoordinateDisplay(
         { latitude: ride.pickup_latitude, longitude: ride.pickup_longitude },
         { latitude: ride.drop_latitude, longitude: ride.drop_longitude }
@@ -825,9 +1042,9 @@ function renderRide(ride) {
         : 'Waiting for matching driver';
 
     const otpCard = document.getElementById('otp-card');
-    otpCard.style.display = ride.status === 'accepted' ? 'block' : 'none';
+    otpCard.style.display = ['searching', 'accepted', 'arriving', 'arrived', 'in_progress'].includes(ride.status) ? 'block' : 'none';
     document.getElementById('ride-otp').textContent = ride.otp || '----';
-    document.getElementById('cancel-btn').style.display = ['searching', 'accepted'].includes(ride.status) ? 'block' : 'none';
+    document.getElementById('cancel-btn').style.display = ['searching', 'accepted', 'arriving', 'arrived'].includes(ride.status) ? 'block' : 'none';
     document.getElementById('complete-demo-btn').style.display = ride.status === 'in_progress' ? 'block' : 'none';
 
     if (ride.road_analysis) renderAnalysis(ride.road_analysis);
@@ -841,6 +1058,10 @@ function renderRide(ride) {
     }
 
     if (ride.status === 'completed') showCompletion(ride);
+    if (['completed', 'cancelled'].includes(ride.status)) {
+        setTripControlsLocked(false);
+        if (simulationTimer) clearInterval(simulationTimer);
+    }
 }
 
 function startVehicleSimulation(route) {
@@ -852,7 +1073,13 @@ function startVehicleSimulation(route) {
     simulationTimer = setInterval(() => {
         index += 1;
         vehicleMarker.setLatLng(latLngs[Math.min(index, latLngs.length - 1)]);
-        if (index >= latLngs.length - 1) clearInterval(simulationTimer);
+        if (index >= latLngs.length - 1) {
+            clearInterval(simulationTimer);
+            if (currentRide && currentRide.status === 'in_progress' && autoCompleteScheduledForRide !== currentRide.id) {
+                autoCompleteScheduledForRide = currentRide.id;
+                setTimeout(() => completeDemoRide(), 900);
+            }
+        }
     }, 850);
 }
 
@@ -863,6 +1090,7 @@ async function cancelCurrentRide() {
         await cancelRide(currentRide.id, 'Cancelled by commuter');
         clearInterval(pollingInterval);
         currentRide.status = 'cancelled';
+        currentRide.cancelled_reason = 'Cancelled by commuter';
         renderRide(currentRide);
     } catch (error) {
         alert(error.message);

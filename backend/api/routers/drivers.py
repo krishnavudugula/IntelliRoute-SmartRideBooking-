@@ -182,8 +182,8 @@ async def get_active_rides(
     
     assigned_rides = db.query(Ride).filter(
         (Ride.driver_id == driver.id) &
-        (Ride.status.in_(["accepted", "in_progress"]))
-    ).order_by(Ride.requested_at.desc()).all()
+        (Ride.status.in_(["accepted", "in_progress", "cancelled"]))
+    ).order_by(Ride.requested_at.desc()).limit(10).all()
     
     request_rides = db.query(Ride).filter(
         (Ride.driver_id.is_(None)) &
