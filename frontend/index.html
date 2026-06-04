@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliRoute - Smart Ride Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="styles/styles.css">
+    <style>
+        body {
+            background: #F4F7FB;
+            color: #1D2735;
+        }
+
+        nav {
+            box-shadow: 0 10px 30px rgba(30, 64, 94, 0.08);
+        }
+
+        .home-shell {
+            overflow: hidden;
+        }
+
+        .home-hero {
+            position: relative;
+            min-height: calc(100vh - 66px);
+            display: grid;
+            grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+            background: #F4F7FB;
+        }
+
+        .hero-copy {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 58px 0 58px max(52px, calc((100vw - 1320px) / 2 + 52px));
+            z-index: 2;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #E7F3EF;
+            color: #1F7B6D;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .hero-copy h1 {
+            max-width: 650px;
+            margin: 22px 0 18px;
+            color: #152A3E;
+            font-family: "Playfair Display", serif;
+            font-size: clamp(48px, 6vw, 84px);
+            line-height: 0.96;
+            letter-spacing: -2px;
+        }
+
+        .hero-copy h1 span {
+            color: #C58A2A;
+        }
+
+        .hero-copy p {
+            max-width: 530px;
+            margin: 0;
+            color: #5E6D7D;
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .home-btn {
+            border: 0;
+            border-radius: 10px;
+            padding: 14px 22px;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .home-btn.primary {
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            color: #ffffff;
+            box-shadow: 0 14px 30px rgba(30, 64, 94, 0.2);
+        }
+
+        .home-btn.secondary {
+            background: #ffffff;
+            color: #1E405E;
+            border: 1px solid #DDE6ED;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            max-width: 590px;
+            margin-top: 42px;
+        }
+
+        .metric-card {
+            border: 1px solid #DDE6ED;
+            border-radius: 12px;
+            background: #ffffff;
+            padding: 16px;
+            box-shadow: 0 12px 34px rgba(30, 64, 94, 0.08);
+        }
+
+        .metric-card strong {
+            display: block;
+            color: #1E405E;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .metric-card span {
+            display: block;
+            margin-top: 5px;
+            color: #5E6D7D;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .hero-map-wrap {
+            position: relative;
+            min-height: calc(100vh - 66px);
+            padding: 34px 52px 34px 18px;
+        }
+
+        #hero-map {
+            width: 100%;
+            height: 100%;
+            min-height: 620px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 32px 90px rgba(30, 64, 94, 0.22);
+            border: 1px solid rgba(30, 64, 94, 0.14);
+            background: #DCE6EE;
+            z-index: 1;
+        }
+
+        .floating-route-card {
+            position: absolute;
+            z-index: 420;
+            left: 44px;
+            bottom: 58px;
+            width: min(370px, calc(100% - 88px));
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 22px 55px rgba(30, 64, 94, 0.22);
+            padding: 18px;
+            backdrop-filter: blur(18px);
+        }
+
+        .floating-route-card .route-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 13px;
+        }
+
+        .route-label {
+            color: #5E6D7D;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .route-time {
+            color: #1E405E;
+            font-family: "Playfair Display", serif;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 0.9;
+        }
+
+        .route-lines {
+            display: grid;
+            gap: 8px;
+            color: #1D2735;
+            font-size: 14px;
+        }
+
+        .route-lines div {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .route-lines strong {
+            color: #1F7B6D;
+            text-align: right;
+        }
+
+        .home-section {
+            padding: 82px 52px;
+        }
+
+        .home-wrap {
+            max-width: 1220px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            max-width: 760px;
+            margin-bottom: 32px;
+        }
+
+        .section-heading h2 {
+            margin: 12px 0 12px;
+            color: #152A3E;
+            font-family: "Playfair Display", serif;
+            font-size: clamp(34px, 4vw, 56px);
+            line-height: 1.02;
+        }
+
+        .section-heading p {
+            color: #5E6D7D;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .ride-grid,
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .ride-card,
+        .step-card {
+            border: 1px solid #DDE6ED;
+            border-radius: 14px;
+            background: #ffffff;
+            padding: 22px;
+            box-shadow: 0 12px 34px rgba(30, 64, 94, 0.08);
+        }
+
+        .ride-card strong,
+        .step-card strong {
+            display: block;
+            color: #1E405E;
+            font-size: 21px;
+            font-weight: 900;
+        }
+
+        .ride-card p,
+        .step-card p {
+            margin: 10px 0 0;
+            color: #5E6D7D;
+            line-height: 1.6;
+        }
+
+        .ride-tag {
+            display: inline-flex;
+            margin-top: 18px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #E7F3EF;
+            color: #1F7B6D;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .intel-band {
+            background: #0F1720;
+            color: #ffffff;
+        }
+
+        .intel-band .section-heading h2 {
+            color: #ffffff;
+        }
+
+        .intel-band .section-heading p {
+            color: #B9C7D6;
+        }
+
+        .intel-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .intel-panel {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: #162332;
+            padding: 22px;
+        }
+
+        .intel-panel h3 {
+            margin: 0 0 12px;
+            color: #ffffff;
+            font-size: 22px;
+        }
+
+        .intel-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .intel-list div {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
+            color: #B9C7D6;
+        }
+
+        .intel-list strong {
+            color: #8FE1D4;
+            text-align: right;
+        }
+
+        .driver-cta {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
+            align-items: center;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            color: #ffffff;
+            padding: 36px;
+            box-shadow: 0 22px 60px rgba(30, 64, 94, 0.22);
+        }
+
+        .driver-cta h2 {
+            margin: 0 0 10px;
+            font-family: "Playfair Display", serif;
+            font-size: clamp(30px, 3.5vw, 48px);
+        }
+
+        .driver-cta p {
+            margin: 0;
+            color: #D7E4EF;
+            line-height: 1.7;
+        }
+
+        footer {
+            border-top: 1px solid #DDE6ED;
+            background: #ffffff;
+            padding: 30px 52px;
+        }
+
+        .footer-row {
+            max-width: 1220px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            color: #5E6D7D;
+            font-size: 13px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #1E405E;
+            font-weight: 800;
+        }
+
+        .home-marker {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border: 3px solid #ffffff;
+            border-radius: 999px;
+            background: #1F7B6D;
+            color: #ffffff;
+            font-weight: 900;
+            box-shadow: 0 12px 26px rgba(30, 64, 94, 0.28);
+        }
+
+        .home-marker.drop {
+            background: #C58A2A;
+        }
+
+        @media (max-width: 1050px) {
+            .home-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-copy {
+                padding: 42px 28px;
+            }
+
+            .hero-map-wrap {
+                min-height: 560px;
+                padding: 0 28px 34px;
+            }
+
+            #hero-map {
+                min-height: 540px;
+            }
+
+            .ride-grid,
+            .steps-grid,
+            .intel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .driver-cta {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            nav {
+                height: auto;
+                min-height: 66px;
+                padding: 12px 18px;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .hero-copy h1 {
+                letter-spacing: -1px;
+            }
+
+            .hero-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .home-section,
+            footer {
+                padding: 58px 22px;
+            }
+
+            .floating-route-card {
+                left: 46px;
+                right: 46px;
+                width: auto;
+                bottom: 52px;
+            }
+
+            .footer-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body data-page="home">
+
+<nav>
+    <div class="nav-logo" onclick="goHome()">
+        <div class="nl-mark">iR</div>
+        <span class="nl-name">Intelli<span>Route</span></span>
+    </div>
+    <div class="nav-links">
+        <button class="active" type="button" onclick="goHome()">Home</button>
+        <button type="button" onclick="goBook()">Book a Ride</button>
+        <button type="button" onclick="window.location.href='/pages/map.html'">Route Map</button>
+        <button type="button" onclick="window.location.href='/pages/safety.html'">Safety</button>
+        <button type="button" onclick="goDriver()">For Drivers</button>
+        <button type="button" onclick="window.location.href='/pages/about.html'">About</button>
+    </div>
+    <div class="nav-cta" id="nav-auth">
+        <span id="user-name" style="display:none;font-weight:800;color:#1E405E;"></span>
+        <button id="btn-logout" data-action="logout" class="btn-outline-sm" style="display:none;">Logout</button>
+        <button id="btn-login" type="button" class="btn-outline-sm" onclick="window.location.href='/pages/login-v2.html'">Sign In</button>
+        <button id="btn-dashboard" type="button" class="btn-fill-sm" style="display:none;" onclick="goDashboard()">Dashboard</button>
+    </div>
+</nav>
+
+<main class="home-shell">
+    <section class="home-hero">
+        <div class="hero-copy">
+            <div class="eyebrow">Real map booking for Warangal</div>
+            <h1>Book safer rides on a live <span>Leaflet map.</span></h1>
+            <p>Choose Bike, Auto, or Car, preview a real OpenStreetMap route, then send the request only to matching verified drivers.</p>
+            <div class="hero-actions">
+                <button class="home-btn primary" type="button" onclick="goBook()">Book Now</button>
+                <button class="home-btn secondary" type="button" onclick="window.location.href='/pages/map.html'">Explore Route Map</button>
+                <button class="home-btn secondary" type="button" onclick="goDriver()">Drive With Us</button>
+            </div>
+            <div class="hero-metrics">
+                <div class="metric-card"><strong>87/100</strong><span>Demo safety score on mapped routes.</span></div>
+                <div class="metric-card"><strong>3 modes</strong><span>Bike, Auto, and Car matching.</span></div>
+                <div class="metric-card"><strong>No key</strong><span>OpenStreetMap tiles through Leaflet.</span></div>
+            </div>
+        </div>
+
+        <div class="hero-map-wrap">
+            <div id="hero-map"></div>
+            <div class="floating-route-card">
+                <div class="route-top">
+                    <div>
+                        <div class="route-label">Featured route</div>
+                        <div>Hanamkonda to Kazipet</div>
+                    </div>
+                    <div class="route-time">11 min</div>
+                </div>
+                <div class="route-lines">
+                    <div><span>Distance</span><strong>7.24 km</strong></div>
+                    <div><span>Estimate</span><strong>Rs 54 - Rs 132</strong></div>
+                    <div><span>Safety</span><strong>High</strong></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="home-wrap">
+            <div class="section-heading">
+                <div class="eyebrow">Ride choices</div>
+                <h2>Pick the vehicle that fits the trip.</h2>
+                <p>The booking page now talks to the backend estimate API, draws the route on Leaflet, and keeps each request tied to one vehicle type.</p>
+            </div>
+            <div class="ride-grid">
+                <article class="ride-card">
+                    <strong>Bike</strong>
+                    <p>Fast solo trips through compact roads and high-traffic junctions.</p>
+                    <span class="ride-tag">Lowest fare</span>
+                </article>
+                <article class="ride-card">
+                    <strong>Auto</strong>
+                    <p>Balanced local commute rides for everyday Warangal routes.</p>
+                    <span class="ride-tag">Local favorite</span>
+                </article>
+                <article class="ride-card">
+                    <strong>Car</strong>
+                    <p>Comfort trips with higher estimates and verified driver matching.</p>
+                    <span class="ride-tag">Comfort mode</span>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section intel-band">
+        <div class="home-wrap">
+            <div class="section-heading">
+                <div class="eyebrow">Route intelligence</div>
+                <h2>Real map first. Smart route details second.</h2>
+                <p>The app keeps the visual map honest while showing useful trip data such as ETA, fare, traffic density, and safety score.</p>
+            </div>
+            <div class="intel-grid">
+                <article class="intel-panel">
+                    <h3>Commuter flow</h3>
+                    <div class="intel-list">
+                        <div><span>Select pickup and drop</span><strong>Fixed Warangal points</strong></div>
+                        <div><span>Preview the route</span><strong>OpenStreetMap</strong></div>
+                        <div><span>Request ride</span><strong>Matching drivers only</strong></div>
+                    </div>
+                </article>
+                <article class="intel-panel">
+                    <h3>Driver flow</h3>
+                    <div class="intel-list">
+                        <div><span>Register</span><strong>Driver signup page</strong></div>
+                        <div><span>Go online</span><strong>Driver console</strong></div>
+                        <div><span>Accept trips</span><strong>Bike, Auto, or Car queue</strong></div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="home-wrap">
+            <div class="section-heading">
+                <div class="eyebrow">How it works</div>
+                <h2>A clean path from signup to ride.</h2>
+            </div>
+            <div class="steps-grid">
+                <article class="step-card">
+                    <strong>1. Register by role</strong>
+                    <p>Commuters use the normal register tab. Drivers continue to the dedicated driver signup page.</p>
+                </article>
+                <article class="step-card">
+                    <strong>2. Login routes you correctly</strong>
+                    <p>Drivers open the Driver Operations Console. Commuters open the commuter dashboard.</p>
+                </article>
+                <article class="step-card">
+                    <strong>3. Book on the real map</strong>
+                    <p>The booking screen uses Leaflet and OSM tiles instead of fake route artwork.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="home-wrap">
+            <div class="driver-cta">
+                <div>
+                    <h2>Driver dashboard is its own workspace.</h2>
+                    <p>Drivers get a dark operations console with online status, matching ride queue, earnings, vehicle info, OTP start flow, and completion controls.</p>
+                </div>
+                <button class="home-btn secondary" type="button" onclick="goDriver()">Open Driver Signup</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-row">
+        <div>IntelliRoute (c) 2026. Smart ride booking demo.</div>
+        <div class="footer-links">
+            <a href="/pages/book-v2.html">Book</a>
+            <a href="/pages/map.html">Map</a>
+            <a href="/pages/driver-signup.html">Driver Signup</a>
+            <a href="/pages/safety.html">Safety</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/app-state.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/api-v2.js"></script>
+<script>
+function goHome() {
+    window.location.href = '/';
+}
+
+function goBook() {
+    window.location.href = AppState.isLoggedIn() ? '/pages/book-v2.html' : '/pages/login-v2.html';
+}
+
+async function goDriver() {
+    if (!AppState.isLoggedIn()) {
+        window.location.href = '/pages/driver-signup.html';
+        return;
+    }
+
+    const driver = await getDriverProfile();
+    window.location.href = driver ? '/pages/driver-dashboard.html' : '/pages/driver-signup.html';
+}
+
+async function goDashboard() {
+    const driver = AppState.isLoggedIn() ? await getDriverProfile() : null;
+    window.location.href = driver ? '/pages/driver-dashboard.html' : '/pages/dashboard.html';
+}
+
+function updateAuthUI() {
+    const loggedIn = AppState.isLoggedIn();
+    const user = AppState.getUser();
+    const loginBtn = document.getElementById('btn-login');
+    const dashboardBtn = document.getElementById('btn-dashboard');
+    const logoutBtn = document.getElementById('btn-logout');
+    const userName = document.getElementById('user-name');
+
+    loginBtn.style.display = loggedIn ? 'none' : 'inline-block';
+    dashboardBtn.style.display = loggedIn ? 'inline-block' : 'none';
+    logoutBtn.style.display = loggedIn ? 'inline-block' : 'none';
+    userName.style.display = loggedIn ? 'inline' : 'none';
+    userName.textContent = user ? (user.first_name || user.username || 'Account') : '';
+}
+
+function makeMarkerIcon(kind) {
+    return L.divIcon({
+        className: '',
+        html: `<div class="home-marker ${kind === 'drop' ? 'drop' : ''}">${kind === 'drop' ? 'D' : 'P'}</div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+    });
+}
+
+function initHeroMap() {
+    if (!window.L || !document.getElementById('hero-map')) return;
+
+    const route = [
+        [18.0094, 79.5580],
+        [18.0079, 79.5637],
+        [18.0051, 79.5716],
+        [18.0012, 79.5799],
+        [17.9970, 79.5874],
+        [17.9924, 79.5951],
+        [17.9892, 79.6022]
+    ];
+
+    const map = L.map('hero-map', {
+        zoomControl: false,
+        scrollWheelZoom: false
+    }).setView([18.0004, 79.5806], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const line = L.polyline(route, {
+        color: '#1E405E',
+        weight: 7,
+        opacity: 0.88,
+        lineJoin: 'round'
+    }).addTo(map);
+
+    L.polyline(route, {
+        color: '#1F7B6D',
+        weight: 3,
+        opacity: 0.95,
+        dashArray: '10, 14'
+    }).addTo(map);
+
+    L.marker(route[0], { icon: makeMarkerIcon('pickup') }).addTo(map).bindPopup('Pickup: Hanamkonda Chowrasta');
+    L.marker(route[route.length - 1], { icon: makeMarkerIcon('drop') }).addTo(map).bindPopup('Drop: Kazipet');
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    map.fitBounds(line.getBounds(), { padding: [70, 70] });
+    setTimeout(() => map.invalidateSize(), 120);
+}
+
+AppState.on('auth:login-success', updateAuthUI);
+AppState.on('auth:logout', updateAuthUI);
+AppState.on('auth:session-restored', updateAuthUI);
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+    initHeroMap();
+});
+</script>
+
+</body>
+</html>

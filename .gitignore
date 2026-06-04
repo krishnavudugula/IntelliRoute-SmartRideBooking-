@@ -1,0 +1,16 @@
+test_venv/
+venv/
+.venv/
+backend/myenv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+db.sqlite3
+backend/db.sqlite3
+*.sqlite3
+*.db-journal
+

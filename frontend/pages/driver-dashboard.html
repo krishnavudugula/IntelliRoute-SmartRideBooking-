@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliRoute - Driver Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/styles.css">
+    <style>
+        body {
+            background: #0F1720;
+            color: #EAF0F6;
+        }
+
+        .driver-console {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+        }
+
+        .driver-sidebar {
+            background: #101A26;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 24px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .driver-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 34px;
+        }
+
+        .driver-brand-mark {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: #1F7B6D;
+            color: #ffffff;
+            font-weight: 900;
+            font-family: "Playfair Display", serif;
+        }
+
+        .driver-brand-title {
+            font-family: "Playfair Display", serif;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .driver-brand-title span {
+            color: #C58A2A;
+        }
+
+        .driver-nav {
+            display: grid;
+            gap: 9px;
+        }
+
+        .driver-nav button {
+            width: 100%;
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 14px;
+            background: transparent;
+            color: #9FB0C3;
+            text-align: left;
+            font-weight: 800;
+        }
+
+        .driver-nav button.active,
+        .driver-nav button:hover {
+            background: rgba(31, 123, 109, 0.18);
+            color: #ffffff;
+        }
+
+        .driver-main {
+            padding: 26px;
+            overflow: hidden;
+        }
+
+        .top-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .top-strip h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 30px;
+        }
+
+        .top-strip p {
+            margin: 6px 0 0;
+            color: #9FB0C3;
+        }
+
+        .driver-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 999px;
+            padding: 8px 12px 8px 16px;
+            background: #162332;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-switch strong {
+            min-width: 72px;
+            font-size: 13px;
+            color: #9FB0C3;
+        }
+
+        .switch-control {
+            width: 56px;
+            height: 30px;
+            border-radius: 999px;
+            background: #3A4757;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .switch-control::after {
+            content: "";
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            top: 3px;
+            left: 3px;
+            border-radius: 50%;
+            background: #ffffff;
+            transition: 0.2s ease;
+        }
+
+        .switch-control.online {
+            background: #1F7B6D;
+        }
+
+        .switch-control.online::after {
+            transform: translateX(26px);
+        }
+
+        .logout-btn {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 10px;
+            padding: 11px 16px;
+            background: transparent;
+            color: #ffffff;
+            font-weight: 800;
+        }
+
+        .console-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) 360px;
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            background: #162332;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 19px;
+        }
+
+        .panel-header span {
+            color: #9FB0C3;
+            font-size: 13px;
+        }
+
+        .queue-body {
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-tile {
+            background: #162332;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .stat-label {
+            color: #9FB0C3;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            margin-top: 7px;
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .ride-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: #101A26;
+            padding: 18px;
+        }
+
+        .ride-card.request {
+            border-color: rgba(197, 138, 42, 0.55);
+            box-shadow: inset 0 0 0 1px rgba(197, 138, 42, 0.08);
+        }
+
+        .ride-card.active-trip {
+            border-color: rgba(31, 123, 109, 0.7);
+        }
+
+        .ride-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .ride-code {
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .ride-status {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #EAF0F6;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .ride-route {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .route-line {
+            display: flex;
+            gap: 9px;
+            color: #D8E2EC;
+            font-size: 14px;
+        }
+
+        .route-line strong {
+            color: #8FE1D4;
+            min-width: 56px;
+        }
+
+        .ride-meta {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .meta-item span {
+            display: block;
+            color: #9FB0C3;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .meta-item strong {
+            display: block;
+            margin-top: 4px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .ride-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            border: 0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-weight: 900;
+        }
+
+        .btn-accept {
+            background: #1F7B6D;
+            color: #ffffff;
+        }
+
+        .btn-reject {
+            background: #3A1F24;
+            color: #FFB6C1;
+        }
+
+        .btn-complete {
+            background: #C58A2A;
+            color: #101A26;
+        }
+
+        .otp-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .otp-row input {
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            background: #0F1720;
+            color: #ffffff;
+            padding: 12px;
+            font-family: "DM Mono", monospace;
+            font-size: 18px;
+            letter-spacing: 5px;
+            text-align: center;
+        }
+
+        .profile-panel {
+            padding: 18px;
+        }
+
+        .driver-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #1F7B6D, #1E405E);
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+
+        .driver-name {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .driver-sub {
+            color: #9FB0C3;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .profile-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 11px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #9FB0C3;
+            font-size: 13px;
+        }
+
+        .profile-row strong {
+            color: #ffffff;
+            text-align: right;
+        }
+
+        .empty-state {
+            padding: 46px 20px;
+            text-align: center;
+            color: #9FB0C3;
+        }
+
+        .empty-state h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 1050px) {
+            .driver-console {
+                grid-template-columns: 1fr;
+            }
+
+            .driver-sidebar {
+                position: static;
+                height: auto;
+            }
+
+            .console-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .top-strip,
+            .driver-actions,
+            .ride-actions,
+            .otp-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stat-row,
+            .ride-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-page="driver-dashboard">
+
+<div class="driver-console">
+    <aside class="driver-sidebar">
+        <div class="driver-brand">
+            <div class="driver-brand-mark">iR</div>
+            <div class="driver-brand-title">Driver<span>Hub</span></div>
+        </div>
+
+        <div class="driver-nav">
+            <button class="active" type="button">Live Requests</button>
+            <button type="button" onclick="window.location.href='/pages/book-v2.html'">Open Rider App</button>
+            <button type="button" onclick="window.location.href='/'">Home</button>
+        </div>
+    </aside>
+
+    <main class="driver-main">
+        <header class="top-strip">
+            <div>
+                <h1>Driver Operations Console</h1>
+                <p id="console-subtitle">Profile loading...</p>
+            </div>
+            <div class="driver-actions">
+                <div class="status-switch">
+                    <strong id="status-label">OFFLINE</strong>
+                    <div class="switch-control" id="online-toggle" onclick="toggleOnlineStatus()"></div>
+                </div>
+                <button id="btn-logout" data-action="logout" class="logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <section class="stat-row">
+            <div class="stat-tile">
+                <div class="stat-label">Today's Earnings</div>
+                <div class="stat-value" id="today-earnings">Rs 0.00</div>
+            </div>
+            <div class="stat-tile">
+                <div class="stat-label">Completed Rides</div>
+                <div class="stat-value" id="total-rides">0</div>
+            </div>
+            <div class="stat-tile">
+                <div class="stat-label">Driver Rating</div>
+                <div class="stat-value" id="driver-rating">5.0</div>
+            </div>
+        </section>
+
+        <section class="console-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Matching Ride Queue</h2>
+                        <span id="polling-text">Go online to scan matching requests.</span>
+                    </div>
+                    <span id="queue-count">0 requests</span>
+                </div>
+                <div class="queue-body" id="rides-container">
+                    <div class="empty-state">
+                        <h3>No active ride requests</h3>
+                        <p>Switch online when you are ready to receive matching requests.</p>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Driver Profile</h2>
+                        <span>Verified demo account</span>
+                    </div>
+                </div>
+                <div class="profile-panel">
+                    <div class="driver-avatar" id="driver-avatar">D</div>
+                    <div class="driver-name" id="driver-name">Driver</div>
+                    <div class="driver-sub" id="driver-sub">Complete your profile to receive rides.</div>
+                    <div class="profile-list">
+                        <div class="profile-row"><span>Vehicle Type</span><strong id="profile-vehicle-type">--</strong></div>
+                        <div class="profile-row"><span>Vehicle Number</span><strong id="profile-vehicle-number">--</strong></div>
+                        <div class="profile-row"><span>Vehicle Model</span><strong id="profile-vehicle-model">--</strong></div>
+                        <div class="profile-row"><span>License</span><strong id="profile-license">Verified</strong></div>
+                        <div class="profile-row"><span>Status</span><strong id="profile-status">Offline</strong></div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+</div>
+
+<script src="../js/app-state.js"></script>
+<script src="../js/api-v2.js"></script>
+<script src="../js/auth-guard.js"></script>
+
+<script>
+protectPage();
+
+let isOnline = false;
+let pollingInterval = null;
+let currentDriver = null;
+
+function money(value) {
+    return `Rs ${Number(value || 0).toFixed(2)}`;
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+}
+
+async function loadDriverDashboard() {
+    try {
+        const user = AppState.getUser();
+        const driver = await getDriverProfile();
+
+        if (!driver) {
+            window.location.href = '/pages/driver-signup.html';
+            return;
+        }
+
+        currentDriver = driver;
+        const displayName = user ? (user.first_name || user.username || 'Driver') : 'Driver';
+        setText('driver-name', displayName);
+        setText('driver-avatar', displayName.slice(0, 1).toUpperCase());
+        setText('console-subtitle', `Ready for ${String(driver.vehicle_type || '').toUpperCase()} requests in Warangal`);
+        setText('driver-sub', `${driver.vehicle_color || 'White'} ${driver.vehicle_model || ''} - ${driver.vehicle_number || ''}`);
+        setText('profile-vehicle-type', String(driver.vehicle_type || '--').toUpperCase());
+        setText('profile-vehicle-number', driver.vehicle_number || '--');
+        setText('profile-vehicle-model', driver.vehicle_model || '--');
+        setText('profile-license', driver.is_verified ? 'Verified' : 'Pending');
+        setText('total-rides', driver.total_rides || 0);
+        setText('driver-rating', Number(driver.rating || 5).toFixed(1));
+
+        const earnings = await getDriverEarnings();
+        if (earnings) setText('today-earnings', money(earnings.total_earnings));
+
+        isOnline = driver.status === 'online';
+        updateToggleUI();
+        if (isOnline) startPolling();
+        fetchActiveRides();
+    } catch (err) {
+        console.error('Error loading driver dashboard:', err);
+    }
+}
+
+async function toggleOnlineStatus() {
+    try {
+        if (!isOnline) {
+            await driverGoOnline();
+            isOnline = true;
+            startPolling();
+        } else {
+            await driverGoOffline();
+            isOnline = false;
+            stopPolling();
+            renderRides([]);
+        }
+        updateToggleUI();
+    } catch (err) {
+        alert('Failed to change status: ' + err.message);
+    }
+}
+
+function updateToggleUI() {
+    const toggle = document.getElementById('online-toggle');
+    toggle.classList.toggle('online', isOnline);
+    setText('status-label', isOnline ? 'ONLINE' : 'OFFLINE');
+    setText('profile-status', isOnline ? 'Online' : 'Offline');
+    setText('polling-text', isOnline ? 'Scanning for matching vehicle-type requests.' : 'Go online to scan matching requests.');
+}
+
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    fetchActiveRides();
+    pollingInterval = setInterval(fetchActiveRides, 2500);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
+async function fetchActiveRides() {
+    if (!isOnline) return;
+
+    try {
+        const rides = await getDriverActiveRides();
+        renderRides(rides);
+    } catch (err) {
+        console.error('Error fetching active rides:', err);
+    }
+}
+
+function renderRides(rides) {
+    const container = document.getElementById('rides-container');
+    setText('queue-count', `${rides ? rides.length : 0} request${rides && rides.length === 1 ? '' : 's'}`);
+
+    if (!rides || rides.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>No active ride requests</h3>
+                <p>${isOnline ? 'Waiting for matching rider requests nearby.' : 'Switch online when you are ready to receive matching requests.'}</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = rides.map(ride => rideCardTemplate(ride)).join('');
+}
+
+function rideCardTemplate(ride) {
+    const fare = money(ride.total_fare);
+    const safety = ride.road_analysis ? `${ride.road_analysis.safety_score}%` : '--';
+    const cardClass = ride.status === 'searching' ? 'ride-card request' : 'ride-card active-trip';
+    let actionHTML = '';
+
+    if (ride.status === 'searching' || ride.status === 'requested') {
+        actionHTML = `
+            <button class="btn-action btn-accept" onclick="handleAcceptRide(${ride.id})">Accept</button>
+            <button class="btn-action btn-reject" onclick="handleRejectRide(${ride.id})">Reject</button>
+        `;
+    } else if (ride.status === 'accepted') {
+        actionHTML = `
+            <div class="otp-row">
+                <input type="text" id="otp-${ride.id}" placeholder="OTP" maxlength="4">
+                <button class="btn-action btn-accept" onclick="handleStartRide(${ride.id})">Start</button>
+            </div>
+        `;
+    } else if (ride.status === 'in_progress') {
+        actionHTML = `<button class="btn-action btn-complete" onclick="handleCompleteRide(${ride.id})">Complete Ride</button>`;
+    }
+
+    return `
+        <article class="${cardClass}">
+            <div class="ride-top">
+                <div class="ride-code">${ride.ride_id}</div>
+                <div class="ride-status">${ride.status.replace('_', ' ')}</div>
+            </div>
+            <div class="ride-route">
+                <div class="route-line"><strong>Pickup</strong><span>${ride.pickup_address}</span></div>
+                <div class="route-line"><strong>Drop</strong><span>${ride.drop_address}</span></div>
+            </div>
+            <div class="ride-meta">
+                <div class="meta-item"><span>Fare</span><strong>${fare}</strong></div>
+                <div class="meta-item"><span>Distance</span><strong>${Number(ride.distance_km || 0).toFixed(1)} km</strong></div>
+                <div class="meta-item"><span>ETA</span><strong>${ride.estimated_time_minutes} min</strong></div>
+                <div class="meta-item"><span>Safety</span><strong>${safety}</strong></div>
+            </div>
+            <div class="ride-actions">${actionHTML}</div>
+        </article>
+    `;
+}
+
+async function handleAcceptRide(rideId) {
+    try {
+        await acceptRide(rideId);
+        fetchActiveRides();
+    } catch (err) {
+        alert('Failed to accept: ' + err.message);
+    }
+}
+
+async function handleRejectRide(rideId) {
+    try {
+        await rejectRide(rideId);
+        fetchActiveRides();
+    } catch (err) {
+        alert('Failed to reject: ' + err.message);
+    }
+}
+
+async function handleStartRide(rideId) {
+    const otpInput = document.getElementById(`otp-${rideId}`);
+    const otp = otpInput ? otpInput.value.trim() : '';
+    if (!otp) {
+        alert('Enter the commuter OTP first.');
+        return;
+    }
+
+    try {
+        await startRide(rideId, otp);
+        fetchActiveRides();
+    } catch (err) {
+        alert('Failed to start ride: ' + err.message);
+    }
+}
+
+async function handleCompleteRide(rideId) {
+    try {
+        await completeRide(rideId);
+        const earnings = await getDriverEarnings();
+        if (earnings) setText('today-earnings', money(earnings.total_earnings));
+        const driver = await getDriverProfile();
+        if (driver) setText('total-rides', driver.total_rides || 0);
+        fetchActiveRides();
+    } catch (err) {
+        alert('Failed to complete ride: ' + err.message);
+    }
+}
+
+window.addEventListener('beforeunload', stopPolling);
+document.addEventListener('DOMContentLoaded', loadDriverDashboard);
+</script>
+</body>
+</html>

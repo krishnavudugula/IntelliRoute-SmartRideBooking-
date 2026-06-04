@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IntelliRoute - About</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="../styles/styles.css"/>
+</head>
+<body data-page="about">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <span class="tb-item"><div class="tb-dot"></div><b>Live</b> · Traffic Data Active</span>
+  </div>
+  <span class="tb-right">Become a Driver Partner →</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nl-mark">iR</div>
+    <span class="nl-name">Intelli<span>Route</span></span>
+  </div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('home',this)">Home</button>
+    <button onclick="showPage('book',this)">Book a Ride</button>
+    <button onclick="showPage('map',this)">Route Map</button>
+    <button onclick="showPage('safety',this)">Safety</button>
+    <button onclick="showPage('driver',this)">For Drivers</button>
+    <button onclick="showPage('about',this)">About</button>
+  </div>
+  <div class="nav-cta">
+    <button class="btn-outline-sm">Sign In</button>
+    <button class="btn-fill-sm" onclick="showPage('book')">Book Now</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     HOME PAGE
+══════════════════════════════════ -->
+<div class="page active" id="page-about">
+  <section class="about-hero">
+    <div class="about-hero-inner">
+      <div class="s-eyebrow reveal" style="justify-content:center">Our Story</div>
+      <h1 class="s-h1 reveal" style="text-align:center">Built for India's<br><em>commuters.</em></h1>
+      <p class="s-body reveal" style="margin-top:14px;text-align:center">IntelliRoute was founded with a single mission — make every urban journey in India measurably safer and smarter through the power of real-time data intelligence.</p>
+    </div>
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="ag-text reveal-l">
+          <div class="s-eyebrow">Our Mission</div>
+          <h2 class="s-h1" style="font-size:2rem">Safer roads for<br><em>every Indian.</em></h2>
+          <p class="s-body" style="margin-top:12px;margin-bottom:20px">We started IntelliRoute after realising that most ride-booking platforms only optimise for speed or price — ignoring the safety data that could genuinely protect riders. In India, 1.5 lakh road accident deaths happen every year. We believe technology can change that.</p>
+          <p class="s-body">By fusing live traffic data with historical accident records, weather feeds, and road quality scores, we give every commuter the intelligence to make a safer journey — every single time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="s-eyebrow reveal">Our Values</div>
+      <h2 class="s-h1 reveal">What we stand for,<br><em>every day.</em></h2>
+      <div class="values-grid">
+        <div class="value-card reveal"><div class="vc-num">01</div><div class="vc-title">Safety First, Always</div><div class="vc-desc">Every product decision is weighed against its impact on rider and driver safety. No compromise, no exception.</div></div>
+        <div class="value-card reveal"><div class="vc-num">02</div><div class="vc-title">Data Transparency</div><div class="vc-desc">We show our working. Every safety score, every alert, every recommendation comes with data you can interrogate.</div></div>
+        <div class="value-card reveal"><div class="vc-num">03</div><div class="vc-title">Driver Dignity</div><div class="vc-desc">Our drivers are partners, not contractors. Fair pay, safety support, and genuine respect in everything we build.</div></div>
+        <div class="value-card reveal"><div class="vc-num">04</div><div class="vc-title">Built for Bharat</div><div class="vc-desc">Designed for Indian roads, Indian weather, Indian cities. Not a western product adapted — built from the ground up.</div></div>
+        <div class="value-card reveal"><div class="vc-num">05</div><div class="vc-title">Continuous Improvement</div><div class="vc-desc">Our algorithm improves with every trip. More data, better predictions, safer routes — every single day.</div></div>
+        <div class="value-card reveal"><div class="vc-num">06</div><div class="vc-title">Community Impact</div><div class="vc-desc">We share anonymised safety insights with municipal bodies to help make Indian roads safer for everyone — not just our users.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner"><div class="cta-inner"><h2 class="cta-h2 reveal">Join the mission.</h2><p class="cta-p reveal">Ride smarter. Drive safer. Help build India's most intelligent transport platform.</p><div class="cta-btns reveal"><button class="btn-gold" onclick="showPage('book')">🚀 Book Your Ride</button><button class="btn-secondary" onclick="showPage('driver')">🚗 Become a Driver</button></div></div></div>
+  <footer>
+    <div class="footer-top">
+      <div class="f-brand"><div class="f-logo"><div class="f-lm">iR</div><div class="f-name">IntelliRoute</div></div><p>Smarter Routes. Safer Journeys. Built in Hyderabad for India's commuters.</p><div class="f-social"><div class="f-soc">𝕏</div><div class="f-soc">in</div><div class="f-soc">f</div><div class="f-soc">▶</div></div></div>
+      <div class="f-col"><h5>Services</h5><ul><li><a href="#">Bike Rides</a></li><li><a href="#">Auto</a></li><li><a href="#">Cab Economy</a></li><li><a href="#">Parcel</a></li></ul></div>
+      <div class="f-col"><h5>Company</h5><ul><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li><li><a href="#">Blog</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div class="f-col"><h5>Safety</h5><ul><li><a href="#">Safety Centre</a></li><li><a href="#">Route Intelligence</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li></ul></div>
+    </div>
+    <div class="f-bottom"><p class="f-copy">© 2025 IntelliRoute Technologies Pvt. Ltd. All rights reserved. Built for safer urban mobility.</p><div class="f-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a></div></div>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="../js/script.js"></script>
+</body>
+</html>
+

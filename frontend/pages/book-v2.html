@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>IntelliRoute - Book a Ride</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="../styles/styles.css">
+    <style>
+        body {
+            background: #eef2f6;
+            color: #1D2735;
+        }
+
+        nav {
+            box-shadow: 0 10px 30px rgba(30, 64, 94, 0.08);
+        }
+
+        .booking-shell {
+            display: grid;
+            grid-template-columns: 420px minmax(0, 1fr);
+            height: calc(100vh - 66px);
+            min-height: 700px;
+        }
+
+        .booking-sidebar {
+            background: #ffffff;
+            border-right: 1px solid rgba(30, 64, 94, 0.12);
+            overflow-y: auto;
+            padding: 26px;
+        }
+
+        .booking-kicker {
+            color: #1F7B6D;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .booking-title {
+            margin: 0;
+            color: #1E405E;
+            font-family: "Playfair Display", serif;
+            font-size: 34px;
+            line-height: 1.05;
+        }
+
+        .booking-subtitle {
+            margin: 10px 0 22px;
+            color: #5E6D7D;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .step-pill {
+            display: inline-flex;
+            align-items: center;
+            margin: 20px 0 12px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: #E7F3EF;
+            color: #1F7B6D;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #1D2735;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #DDE4EA;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #1E405E;
+            box-shadow: 0 0 0 3px rgba(30, 64, 94, 0.12);
+        }
+
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+        }
+
+        .vehicle-btn {
+            border: 1px solid #DDE4EA;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 13px 8px;
+            color: #1D2735;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .vehicle-btn.active {
+            background: #1E405E;
+            border-color: #1E405E;
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(30, 64, 94, 0.18);
+        }
+
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            padding: 13px 14px;
+            font-size: 14px;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            color: #ffffff;
+        }
+
+        .secondary-btn {
+            margin-top: 12px;
+            background: #E7F3EF;
+            color: #1F7B6D;
+        }
+
+        .danger-btn {
+            margin-top: 12px;
+            background: #FDECEC;
+            color: #C93636;
+        }
+
+        .primary-btn:disabled,
+        .secondary-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .estimate-box,
+        .status-panel {
+            display: none;
+            margin-top: 18px;
+        }
+
+        .estimate-box.show,
+        .status-panel.show {
+            display: block;
+        }
+
+        .metric-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 11px;
+            border-radius: 8px;
+            background: #F6F8FA;
+            color: #2F3C4D;
+            font-size: 13px;
+        }
+
+        .metric-row strong {
+            color: #1E405E;
+            text-align: right;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .analysis-item {
+            border: 1px solid #E3E9EE;
+            border-radius: 8px;
+            padding: 11px;
+            background: #ffffff;
+        }
+
+        .analysis-label {
+            color: #6B7280;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+        }
+
+        .analysis-value {
+            margin-top: 5px;
+            color: #1E405E;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .ride-status-pill {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #FFF4D8;
+            color: #8A5B08;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .otp-card {
+            display: none;
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #E5F5ED;
+            color: #1A7F5A;
+            text-align: center;
+        }
+
+        .otp-card span {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .otp-card strong {
+            display: block;
+            margin-top: 8px;
+            font-family: "DM Mono", monospace;
+            font-size: 36px;
+            letter-spacing: 8px;
+        }
+
+        .completion-card {
+            display: none;
+            margin-top: 14px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #E5F5ED;
+            border: 1px solid #BFE6D0;
+        }
+
+        .completion-card.show {
+            display: block;
+        }
+
+        .completion-card h3 {
+            color: #1A7F5A;
+            margin: 0 0 8px;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #FDECEC;
+            color: #C93636;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .map-zone {
+            position: relative;
+            min-width: 0;
+            background: #dfe8ef;
+        }
+
+        #ride-map {
+            width: 100%;
+            height: 100%;
+            min-height: 700px;
+            z-index: 1;
+        }
+
+        .map-hud {
+            position: absolute;
+            z-index: 450;
+            top: 22px;
+            left: 22px;
+            right: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            pointer-events: none;
+        }
+
+        .hud-card {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(30, 64, 94, 0.12);
+            border-radius: 12px;
+            box-shadow: 0 18px 40px rgba(30, 64, 94, 0.16);
+            padding: 14px 16px;
+            backdrop-filter: blur(16px);
+        }
+
+        .hud-card h2 {
+            margin: 0;
+            color: #1E405E;
+            font-size: 20px;
+        }
+
+        .hud-card p {
+            margin: 5px 0 0;
+            color: #5E6D7D;
+            font-size: 13px;
+        }
+
+        .coord-stack {
+            display: grid;
+            gap: 4px;
+            margin-top: 10px;
+        }
+
+        .coord-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            color: #1D2735;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .coord-pill span {
+            color: #5E6D7D;
+            font-weight: 600;
+        }
+
+        .hud-chip-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 9px;
+        }
+
+        .hud-chip {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #EEF4F1;
+            color: #1F7B6D;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .leaflet-control-container .leaflet-routing-container-hide {
+            display: none;
+        }
+
+        .ir-popup {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            color: #1D2735;
+        }
+
+        .vehicle-map-pin,
+        .stop-map-pin {
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            box-shadow: 0 12px 28px rgba(30, 64, 94, 0.24);
+        }
+
+        .vehicle-map-pin {
+            width: 46px;
+            height: 46px;
+            background: #1E405E;
+            border: 3px solid #ffffff;
+        }
+
+        .stop-map-pin {
+            width: 34px;
+            height: 34px;
+            background: #1F7B6D;
+            border: 3px solid #ffffff;
+        }
+
+        .stop-map-pin.drop {
+            background: #C58A2A;
+        }
+
+        @media (max-width: 960px) {
+            .booking-shell {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .booking-sidebar {
+                max-height: none;
+                border-right: 0;
+                border-bottom: 1px solid rgba(30, 64, 94, 0.12);
+            }
+
+            #ride-map {
+                height: 520px;
+                min-height: 520px;
+            }
+
+            .map-hud {
+                position: static;
+                padding: 14px;
+                display: block;
+            }
+
+            .map-zone {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body data-page="book">
+
+<nav>
+    <div class="nav-logo" onclick="window.location.href='/'">
+        <div class="nl-mark">iR</div>
+        <span class="nl-name">Intelli<span>Route</span></span>
+    </div>
+    <div class="nav-links">
+        <button onclick="window.location.href='/pages/dashboard.html'">Dashboard</button>
+        <button class="active">Book Ride</button>
+        <button onclick="window.location.href='/pages/driver-dashboard.html'">Driver</button>
+    </div>
+    <div class="nav-cta" style="display: flex; align-items: center; gap: 10px;">
+        <span id="user-name" style="font-weight: 800; color: #1E405E;"></span>
+        <button id="btn-logout" data-action="logout" class="btn-outline-sm">Logout</button>
+    </div>
+</nav>
+
+<main class="booking-shell">
+    <aside class="booking-sidebar">
+        <div class="booking-kicker">Warangal live map booking</div>
+        <h1 class="booking-title">Book a Ride</h1>
+        <p class="booking-subtitle">Choose fixed Warangal points, check the estimate, then send the ride request to matching drivers only.</p>
+
+        <div class="step-pill">Step 1 - Trip details</div>
+        <div class="form-group">
+            <label for="pickup-location">Pickup</label>
+            <select id="pickup-location"></select>
+        </div>
+        <div class="form-group">
+            <label for="drop-location">Destination</label>
+            <select id="drop-location"></select>
+        </div>
+        <div class="form-group">
+            <label>Ride Type</label>
+            <div class="vehicle-grid" id="vehicle-grid"></div>
+        </div>
+        <button class="primary-btn" id="estimate-btn" type="button" onclick="handleEstimate()">View Estimate</button>
+        <div class="error-message" id="booking-error"></div>
+
+        <section class="estimate-box" id="estimate-box">
+            <div class="step-pill">Step 2 - Estimate</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Distance</span><strong id="estimate-distance">--</strong></div>
+                <div class="metric-row"><span>Estimated time</span><strong id="estimate-time">--</strong></div>
+                <div class="metric-row"><span>Estimated fare</span><strong id="estimate-fare">--</strong></div>
+                <div class="metric-row"><span>Safety score</span><strong id="estimate-safety">--</strong></div>
+            </div>
+            <div class="analysis-grid" id="analysis-grid"></div>
+            <button class="secondary-btn" id="request-btn" type="button" onclick="requestRide()">Request Ride</button>
+        </section>
+
+        <section class="status-panel" id="status-panel">
+            <div class="step-pill">Step 3 - Ride status</div>
+            <span class="ride-status-pill" id="ride-status-pill">Searching</span>
+            <div class="metric-list">
+                <div class="metric-row"><span>Pickup</span><strong id="ride-pickup">--</strong></div>
+                <div class="metric-row"><span>Drop</span><strong id="ride-drop">--</strong></div>
+                <div class="metric-row"><span>Fare</span><strong id="ride-fare">--</strong></div>
+                <div class="metric-row"><span>Driver</span><strong id="ride-driver">Waiting</strong></div>
+            </div>
+            <div class="otp-card" id="otp-card">
+                <span>Share this OTP with driver</span>
+                <strong id="ride-otp">----</strong>
+            </div>
+            <button class="secondary-btn" id="complete-demo-btn" type="button" onclick="completeDemoRide()" style="display: none;">Finish Simulation</button>
+            <button class="danger-btn" id="cancel-btn" type="button" onclick="cancelCurrentRide()">Cancel Ride</button>
+            <div class="completion-card" id="completion-card"></div>
+        </section>
+    </aside>
+
+    <section class="map-zone">
+        <div id="ride-map"></div>
+        <div class="map-hud">
+            <div class="hud-card">
+                <h2>Leaflet Route Map</h2>
+                <p id="map-hint">Select a route to draw it on OpenStreetMap.</p>
+                <div class="coord-stack">
+                    <div class="coord-pill"><span>Pickup</span><strong id="pickup-coords">--</strong></div>
+                    <div class="coord-pill"><span>Drop</span><strong id="drop-coords">--</strong></div>
+                </div>
+                <div class="hud-chip-row">
+                    <span class="hud-chip">OpenStreetMap</span>
+                    <span class="hud-chip">No API key</span>
+                    <span class="hud-chip">Warangal</span>
+                </div>
+            </div>
+            <div class="hud-card">
+                <h2 id="hud-eta">-- min</h2>
+                <p id="hud-summary">Distance and fare appear after estimate.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+if (typeof window.L === 'undefined') {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><\\/script>');
+}
+</script>
+<script src="../js/app-state.js"></script>
+<script src="../js/api-v2.js"></script>
+<script src="../js/auth-guard.js"></script>
+
+<script>
+protectPage();
+
+let demoData = { locations: [], vehicle_types: [] };
+let selectedVehicle = 'bike';
+let currentEstimate = null;
+let currentRide = null;
+let pollingInterval = null;
+let simulationTimer = null;
+let simulationStartedForRide = null;
+let rideMap = null;
+let routeLayer = null;
+let vehicleMarker = null;
+
+function money(value) {
+    return `Rs ${Number(value || 0).toFixed(2)}`;
+}
+
+function setError(message) {
+    const error = document.getElementById('booking-error');
+    error.textContent = message || '';
+    error.classList.toggle('show', Boolean(message));
+}
+
+function initMap() {
+    if (rideMap) return;
+    if (typeof window.L === 'undefined') {
+        setError('Leaflet map could not load. Refresh once and check your internet connection.');
+        document.getElementById('map-hint').textContent = 'Map library did not load.';
+        return;
+    }
+
+    rideMap = L.map('ride-map', {
+        zoomControl: true,
+        scrollWheelZoom: true
+    }).setView([18.0094, 79.5580], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(rideMap);
+
+    routeLayer = L.layerGroup().addTo(rideMap);
+}
+
+function makeStopIcon(type) {
+    return L.divIcon({
+        className: '',
+        html: `<div class="stop-map-pin ${type === 'drop' ? 'drop' : ''}">${type === 'drop' ? 'D' : 'P'}</div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+    });
+}
+
+function makeVehicleIcon() {
+    return L.divIcon({
+        className: '',
+        html: `<div class="vehicle-map-pin">${selectedVehicle.toUpperCase()}</div>`,
+        iconSize: [46, 46],
+        iconAnchor: [23, 23]
+    });
+}
+
+function populateLocations() {
+    const pickup = document.getElementById('pickup-location');
+    const drop = document.getElementById('drop-location');
+    const options = demoData.locations.map(location => `<option value="${location.name}">${location.name}</option>`).join('');
+
+    pickup.innerHTML = options;
+    drop.innerHTML = options;
+    if (demoData.locations.length > 1) drop.selectedIndex = 1;
+    updateSelectedCoordinatePreview();
+}
+
+function populateVehicles() {
+    const grid = document.getElementById('vehicle-grid');
+    grid.innerHTML = demoData.vehicle_types.map(vehicle => (
+        `<button type="button" class="vehicle-btn ${vehicle.value === selectedVehicle ? 'active' : ''}" data-vehicle="${vehicle.value}" onclick="selectVehicle('${vehicle.value}')">${vehicle.label}</button>`
+    )).join('');
+}
+
+function selectVehicle(type) {
+    selectedVehicle = type;
+    document.querySelectorAll('.vehicle-btn').forEach(button => {
+        button.classList.toggle('active', button.dataset.vehicle === type);
+    });
+    if (vehicleMarker) vehicleMarker.setIcon(makeVehicleIcon());
+}
+
+function getSelectedLocations() {
+    return {
+        pickup_location: document.getElementById('pickup-location').value,
+        drop_location: document.getElementById('drop-location').value,
+        vehicle_type: selectedVehicle
+    };
+}
+
+function findLocationByName(name) {
+    return demoData.locations.find(location => location.name === name) || null;
+}
+
+function formatCoords(location) {
+    return `${Number(location.latitude).toFixed(4)}, ${Number(location.longitude).toFixed(4)}`;
+}
+
+function updateCoordinateDisplay(pickupLocation, dropLocation) {
+    document.getElementById('pickup-coords').textContent = pickupLocation ? formatCoords(pickupLocation) : '--';
+    document.getElementById('drop-coords').textContent = dropLocation ? formatCoords(dropLocation) : '--';
+}
+
+function updateSelectedCoordinatePreview() {
+    const selection = getSelectedLocations();
+    updateCoordinateDisplay(
+        findLocationByName(selection.pickup_location),
+        findLocationByName(selection.drop_location)
+    );
+}
+
+async function handleEstimate() {
+    const estimateRequest = getSelectedLocations();
+    if (estimateRequest.pickup_location === estimateRequest.drop_location) {
+        setError('Pickup and destination must be different.');
+        return;
+    }
+
+    try {
+        setError('');
+        document.getElementById('estimate-btn').disabled = true;
+        currentEstimate = await estimateRide(estimateRequest);
+        renderEstimate(currentEstimate);
+        drawLeafletRoute(currentEstimate.route_coordinates, currentEstimate.pickup.name, currentEstimate.drop.name);
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        document.getElementById('estimate-btn').disabled = false;
+    }
+}
+
+function renderEstimate(estimate) {
+    document.getElementById('estimate-box').classList.add('show');
+    document.getElementById('estimate-distance').textContent = `${estimate.distance_km} km`;
+    document.getElementById('estimate-time').textContent = `${estimate.estimated_time_minutes} min`;
+    document.getElementById('estimate-fare').textContent = money(estimate.pricing.total_fare);
+    document.getElementById('estimate-safety').textContent = `${estimate.road_analysis.safety_score}%`;
+    document.getElementById('hud-eta').textContent = `${estimate.estimated_time_minutes} min`;
+    document.getElementById('hud-summary').textContent = `${estimate.distance_km} km - ${money(estimate.pricing.total_fare)} - Safety ${estimate.road_analysis.safety_score}%`;
+    updateCoordinateDisplay(estimate.pickup, estimate.drop);
+    renderAnalysis(estimate.road_analysis);
+}
+
+function renderAnalysis(analysis) {
+    const grid = document.getElementById('analysis-grid');
+    const items = [
+        ['Traffic', analysis.traffic_density],
+        ['Condition', analysis.road_condition],
+        ['Risk', analysis.accident_risk],
+        ['Congestion', analysis.congestion_level],
+        ['Crowd', analysis.crowd_level],
+        ['Speed', analysis.recommended_speed]
+    ];
+
+    grid.innerHTML = items.map(([label, value]) => `
+        <div class="analysis-item">
+            <div class="analysis-label">${label}</div>
+            <div class="analysis-value">${value}</div>
+        </div>
+    `).join('');
+}
+
+function drawLeafletRoute(route, pickupLabel, dropLabel) {
+    initMap();
+    routeLayer.clearLayers();
+    if (simulationTimer) clearInterval(simulationTimer);
+    vehicleMarker = null;
+
+    if (!route || route.length < 2) {
+        document.getElementById('map-hint').textContent = 'Select a route to draw it on OpenStreetMap.';
+        return;
+    }
+
+    const latLngs = route.map(point => [point.latitude, point.longitude]);
+    const pickup = latLngs[0];
+    const drop = latLngs[latLngs.length - 1];
+
+    L.polyline(latLngs, {
+        color: '#1E405E',
+        weight: 7,
+        opacity: 0.88,
+        lineJoin: 'round'
+    }).addTo(routeLayer);
+
+    L.polyline(latLngs, {
+        color: '#1F7B6D',
+        weight: 3,
+        opacity: 0.95,
+        dashArray: '10, 14',
+        lineJoin: 'round'
+    }).addTo(routeLayer);
+
+    L.marker(pickup, { icon: makeStopIcon('pickup') })
+        .addTo(routeLayer)
+        .bindPopup(`<div class="ir-popup"><b>Pickup</b><br>${pickupLabel}</div>`);
+
+    L.marker(drop, { icon: makeStopIcon('drop') })
+        .addTo(routeLayer)
+        .bindPopup(`<div class="ir-popup"><b>Drop</b><br>${dropLabel}</div>`);
+
+    vehicleMarker = L.marker(pickup, { icon: makeVehicleIcon() }).addTo(routeLayer);
+    rideMap.fitBounds(L.latLngBounds(latLngs), { padding: [70, 70] });
+
+    document.getElementById('map-hint').textContent = `${pickupLabel} to ${dropLabel}`;
+    setTimeout(() => rideMap.invalidateSize(), 100);
+}
+
+async function requestRide() {
+    if (!currentEstimate) {
+        await handleEstimate();
+        if (!currentEstimate) return;
+    }
+
+    try {
+        setError('');
+        document.getElementById('request-btn').disabled = true;
+        currentRide = await createRide(getSelectedLocations());
+        document.getElementById('status-panel').classList.add('show');
+        renderRide(currentRide);
+        startPolling();
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        document.getElementById('request-btn').disabled = false;
+    }
+}
+
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(refreshRideStatus, 2000);
+}
+
+async function refreshRideStatus() {
+    if (!currentRide) return;
+
+    try {
+        const activeRide = await getActiveRide();
+        if (activeRide) {
+            currentRide = activeRide;
+        } else if (currentRide.id) {
+            currentRide = await getRideDetail(currentRide.id);
+        }
+        renderRide(currentRide);
+        if (['completed', 'cancelled'].includes(currentRide.status)) clearInterval(pollingInterval);
+    } catch (error) {
+        console.warn('Ride status refresh failed:', error);
+    }
+}
+
+function renderRide(ride) {
+    document.getElementById('status-panel').classList.add('show');
+    document.getElementById('ride-status-pill').textContent = ride.status.replace('_', ' ').toUpperCase();
+    document.getElementById('ride-pickup').textContent = ride.pickup_address;
+    document.getElementById('ride-drop').textContent = ride.drop_address;
+    document.getElementById('ride-fare').textContent = money(ride.total_fare);
+    updateCoordinateDisplay(
+        { latitude: ride.pickup_latitude, longitude: ride.pickup_longitude },
+        { latitude: ride.drop_latitude, longitude: ride.drop_longitude }
+    );
+
+    const driverName = ride.driver && ride.driver.user
+        ? (ride.driver.user.first_name || ride.driver.user.username || 'Driver')
+        : 'Waiting';
+    document.getElementById('ride-driver').textContent = ride.driver
+        ? `${driverName} - ${ride.driver.vehicle_model} (${ride.driver.vehicle_number})`
+        : 'Waiting for matching driver';
+
+    const otpCard = document.getElementById('otp-card');
+    otpCard.style.display = ride.status === 'accepted' ? 'block' : 'none';
+    document.getElementById('ride-otp').textContent = ride.otp || '----';
+    document.getElementById('cancel-btn').style.display = ['searching', 'accepted'].includes(ride.status) ? 'block' : 'none';
+    document.getElementById('complete-demo-btn').style.display = ride.status === 'in_progress' ? 'block' : 'none';
+
+    if (ride.road_analysis) renderAnalysis(ride.road_analysis);
+    if (ride.route_coordinates && ride.route_coordinates.length) {
+        drawLeafletRoute(ride.route_coordinates, ride.pickup_address, ride.drop_address);
+    }
+
+    if (ride.status === 'in_progress' && simulationStartedForRide !== ride.id) {
+        simulationStartedForRide = ride.id;
+        startVehicleSimulation(ride.route_coordinates || []);
+    }
+
+    if (ride.status === 'completed') showCompletion(ride);
+}
+
+function startVehicleSimulation(route) {
+    if (!route || route.length < 2 || !vehicleMarker) return;
+    if (simulationTimer) clearInterval(simulationTimer);
+
+    const latLngs = route.map(point => [point.latitude, point.longitude]);
+    let index = 0;
+    simulationTimer = setInterval(() => {
+        index += 1;
+        vehicleMarker.setLatLng(latLngs[Math.min(index, latLngs.length - 1)]);
+        if (index >= latLngs.length - 1) clearInterval(simulationTimer);
+    }, 850);
+}
+
+async function cancelCurrentRide() {
+    if (!currentRide || !confirm('Cancel this ride request?')) return;
+
+    try {
+        await cancelRide(currentRide.id, 'Cancelled by commuter');
+        clearInterval(pollingInterval);
+        currentRide.status = 'cancelled';
+        renderRide(currentRide);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function completeDemoRide() {
+    if (!currentRide) return;
+    try {
+        currentRide = await completeRide(currentRide.id);
+        clearInterval(pollingInterval);
+        renderRide(currentRide);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+function showCompletion(ride) {
+    const summary = ride.completion_summary || {};
+    const card = document.getElementById('completion-card');
+    card.innerHTML = `
+        <h3>${summary.message || 'Ride Completed Successfully'}</h3>
+        <div class="metric-list">
+            <div class="metric-row"><span>Distance Covered</span><strong>${summary.distance_covered || ride.distance_km} km</strong></div>
+            <div class="metric-row"><span>Time Taken</span><strong>${summary.time_taken || ride.estimated_time_minutes} min</strong></div>
+            <div class="metric-row"><span>Fare Paid</span><strong>${money(summary.fare_paid || ride.total_fare)}</strong></div>
+            <div class="metric-row"><span>Safety Score</span><strong>${summary.safety_score || (ride.road_analysis && ride.road_analysis.safety_score) || '--'}%</strong></div>
+        </div>
+        <button class="secondary-btn" type="button" onclick="window.location.href='/pages/dashboard.html'">Back to Dashboard</button>
+    `;
+    card.classList.add('show');
+}
+
+async function restoreCurrentRide() {
+    const activeRide = await getActiveRide();
+    if (activeRide) {
+        currentRide = activeRide;
+        currentEstimate = {
+            route_coordinates: activeRide.route_coordinates,
+            road_analysis: activeRide.road_analysis
+        };
+        renderRide(activeRide);
+        startPolling();
+    }
+}
+
+async function initBookingPage() {
+    try {
+        initMap();
+        const user = AppState.getUser();
+        if (user) document.getElementById('user-name').textContent = user.first_name || user.username;
+
+        demoData = await getRideDemoData();
+        populateLocations();
+        populateVehicles();
+        document.getElementById('pickup-location').addEventListener('change', updateSelectedCoordinatePreview);
+        document.getElementById('drop-location').addEventListener('change', updateSelectedCoordinatePreview);
+        await handleEstimate();
+        await restoreCurrentRide();
+    } catch (error) {
+        setError(error.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initBookingPage);
+</script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IntelliRoute - Trip History</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../styles/styles.css"/>
+<style>
+  .history-container {
+    padding: 40px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 32px;
+  }
+  @media (max-width: 900px) {
+    .history-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--c-surface, #fff);
+    border: 1px solid var(--c-bg2, #eef2f6);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--sh-sm);
+  }
+  body.dark-mode .stat-card {
+    background: #1e1e1e;
+    border-color: #333;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--c-navy);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+  }
+  body.dark-mode .stat-value { color: #fff; }
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--c-ink3);
+    font-weight: 600;
+  }
+
+  .ride-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ride-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--c-surface, #fff);
+    border: 1px solid var(--c-bg2, #eef2f6);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--sh-sm);
+    transition: all 0.2s;
+  }
+  body.dark-mode .ride-card {
+    background: #1e1e1e;
+    border-color: #333;
+  }
+  .ride-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sh-md);
+    border-color: var(--c-teal);
+  }
+  .ride-info {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .ride-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(30, 64, 94, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  body.dark-mode .ride-icon { background: rgba(255,255,255,0.05); }
+  .ride-route {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+    color: var(--c-navy);
+  }
+  body.dark-mode .ride-route { color: #fff; }
+  .ride-meta {
+    font-size: 0.85rem;
+    color: var(--c-ink3);
+  }
+  .ride-fare-block {
+    text-align: right;
+  }
+  .ride-fare {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--c-ink);
+    margin-bottom: 4px;
+  }
+  body.dark-mode .ride-fare { color: #fff; }
+  .ride-rating {
+    font-size: 0.8rem;
+    color: var(--c-gold);
+  }
+
+  .saved-places {
+    background: var(--c-surface, #fff);
+    border: 1px solid var(--c-bg2, #eef2f6);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sh-sm);
+    position: sticky;
+    top: 100px;
+  }
+  body.dark-mode .saved-places {
+    background: #1e1e1e;
+    border-color: #333;
+  }
+  .sp-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--c-bg2, #eef2f6);
+  }
+  body.dark-mode .sp-item { border-bottom-color: #333; }
+  .sp-item:last-child { border-bottom: none; }
+  .sp-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(31, 123, 109, 0.1);
+    color: var(--c-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sp-title { font-weight: 700; font-size: 0.95rem; }
+  body.dark-mode .sp-title { color: #fff; }
+  .sp-desc { font-size: 0.8rem; color: var(--c-ink3); }
+
+  .btn-rebook {
+    padding: 8px 16px;
+    background: var(--c-teal);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-rebook:hover { opacity: 0.9; }
+</style>
+</head>
+<body data-page="history">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <span class="tb-item"><div class="tb-dot"></div><b>Live</b> · Hyderabad Network Active</span>
+  </div>
+  <span class="tb-right" style="cursor:default;">Theme: Light</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nl-mark">iR</div>
+    <span class="nl-name">Intelli<span>Route</span></span>
+  </div>
+  <div class="nav-links">
+    <button onclick="showPage('home',this)">Home</button>
+    <button onclick="showPage('book',this)">Book a Ride</button>
+    <button onclick="showPage('map',this)">Route Map</button>
+    <button onclick="showPage('safety',this)">Safety</button>
+    <button class="active" onclick="window.location.reload()">History</button>
+  </div>
+  <div class="nav-user" id="nav-user" style="display:flex;align-items:center;gap:10px;margin-left:12px;">
+    <span id="user-name" style="font-weight:700;display:none;"></span>
+    <button id="btn-logout" data-action="logout" style="display:none;" class="btn-outline-sm">Logout</button>
+  </div>
+</nav>
+
+<div class="history-container page active" id="page-history" style="opacity:1;">
+  
+  <div class="history-main">
+    <h2 class="s-h1" style="margin-bottom: 8px;">Trip History</h2>
+    <p style="color: var(--c-ink3); margin-bottom: 24px;">Review your past rides, expenses, and frequently visited locations.</p>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value">142</div>
+        <div class="stat-label">Total Rides</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">₹14,250</div>
+        <div class="stat-label">Total Spent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">84km</div>
+        <div class="stat-label">Miles This Month</div>
+      </div>
+    </div>
+
+    <!-- Recent Rides -->
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 16px; color: var(--c-navy);">Recent Rides</h3>
+    
+    <div class="ride-list">
+      <!-- Ride 1 -->
+      <div class="ride-card">
+        <div class="ride-info">
+          <div class="ride-icon">🏍️</div>
+          <div>
+            <div class="ride-route">Hitech City → Banjara Hills</div>
+            <div class="ride-meta">Today, 09:14 AM • IntelliRoute Bike</div>
+          </div>
+        </div>
+        <div class="ride-fare-block">
+          <div class="ride-fare">₹65</div>
+          <div class="ride-rating">★★★★★</div>
+        </div>
+      </div>
+
+      <!-- Ride 2 -->
+      <div class="ride-card">
+        <div class="ride-info">
+          <div class="ride-icon">🚗</div>
+          <div>
+            <div class="ride-route">Gachibowli → Airport</div>
+            <div class="ride-meta">Yesterday, 04:30 PM • IntelliRoute Cab</div>
+          </div>
+        </div>
+        <div class="ride-fare-block">
+          <div class="ride-fare">₹480</div>
+          <div class="ride-rating">★★★★☆</div>
+        </div>
+      </div>
+
+      <!-- Ride 3 -->
+      <div class="ride-card">
+        <div class="ride-info">
+          <div class="ride-icon">🛺</div>
+          <div>
+            <div class="ride-route">Jubilee Hills → Inorbit Mall</div>
+            <div class="ride-meta">May 24, 02:15 PM • IntelliRoute Auto</div>
+          </div>
+        </div>
+        <div class="ride-fare-block">
+          <div class="ride-fare">₹110</div>
+          <div class="ride-rating">★★★★★</div>
+        </div>
+      </div>
+
+      <!-- Ride 4 -->
+      <div class="ride-card" style="opacity: 0.7;">
+        <div class="ride-info">
+          <div class="ride-icon" style="background: rgba(201, 54, 54, 0.1);">❌</div>
+          <div>
+            <div class="ride-route">Madhapur → Kondapur</div>
+            <div class="ride-meta">May 22, 10:00 AM • Cancelled by you</div>
+          </div>
+        </div>
+        <div class="ride-fare-block">
+          <div class="ride-fare" style="text-decoration: line-through; color: var(--c-ink4);">₹85</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="history-sidebar">
+    <div class="saved-places">
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 20px; color: var(--c-navy);">Saved Places</h3>
+      
+      <div class="sp-item">
+        <div class="sp-icon">🏠</div>
+        <div style="flex: 1;">
+          <div class="sp-title">Home</div>
+          <div class="sp-desc">Villa 42, Jubilee Hills, Hyd</div>
+        </div>
+        <button class="btn-rebook" onclick="showPage('book')">Book</button>
+      </div>
+
+      <div class="sp-item">
+        <div class="sp-icon">💼</div>
+        <div style="flex: 1;">
+          <div class="sp-title">Work</div>
+          <div class="sp-desc">Mindspace IT Park, Hitech City</div>
+        </div>
+        <button class="btn-rebook" onclick="showPage('book')">Book</button>
+      </div>
+
+      <div class="sp-item">
+        <div class="sp-icon">⭐</div>
+        <div style="flex: 1;">
+          <div class="sp-title">Gym</div>
+          <div class="sp-desc">Cult.fit, Gachibowli</div>
+        </div>
+        <button class="btn-rebook" onclick="showPage('book')">Book</button>
+      </div>
+
+      <button class="btn-outline-sm" style="width: 100%; margin-top: 16px; padding: 12px;">+ Add New Place</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="../js/api.js"></script>
+<script src="../js/auth-guard.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUserInfo();
+    setupLogoutButton();
+  });
+</script>
+<script src="../js/script.js"></script>
+</body>
+</html>

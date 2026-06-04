@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IntelliRoute - Route Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="../styles/styles.css"/>
+</head>
+<body data-page="map">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <span class="tb-item"><div class="tb-dot"></div><b>Live</b> · Traffic Data Active</span>
+    <span class="tb-item">📍 Hyderabad · Bengaluru · Mumbai · Delhi</span>
+    <span class="tb-item">🛡️ <b>2,847</b> Safe Routes Delivered Today</span>
+  </div>
+  <span class="tb-right">Become a Driver Partner →</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nl-mark">iR</div>
+    <span class="nl-name">Intelli<span>Route</span></span>
+  </div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('home',this)">Home</button>
+    <button onclick="showPage('book',this)">Book a Ride</button>
+    <button onclick="showPage('map',this)">Route Map</button>
+    <button onclick="showPage('safety',this)">Safety</button>
+    <button onclick="showPage('driver',this)">For Drivers</button>
+    <button onclick="showPage('about',this)">About</button>
+  </div>
+  <div class="nav-cta">
+    <button class="btn-outline-sm">Sign In</button>
+    <button class="btn-fill-sm" onclick="showPage('book')">Book Now</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     HOME PAGE
+══════════════════════════════════ -->
+<div class="page active" id="page-map">
+  <div style="background:linear-gradient(90deg,#EEF2F6 0%,#E6ECF2 100%);padding:12px 52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(30,64,94,.13)">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span style="font-size:.78rem;color:var(--c-ink3)">📍 Hitech City → Banjara Hills</span>
+      <span style="font-size:.78rem;color:var(--c-ink4)">|</span>
+      <span style="font-size:.78rem;color:var(--c-ink3)">🕐 9:14 AM</span>
+      <span style="font-size:.78rem;color:var(--c-ink4)">|</span>
+      <span style="font-size:.78rem;color:var(--c-gold2);font-weight:600">Safety Score: 87/100</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-secondary" style="padding:7px 16px;font-size:.8rem">Share Route</button>
+      <button class="btn-primary" style="padding:7px 18px;font-size:.8rem" onclick="showPage('book')">Book This Route →</button>
+    </div>
+  </div>
+  <div class="map-page-layout">
+    <!-- Sidebar -->
+    <div class="mp-sidebar">
+      <div class="mp-sb-top">
+        <div class="mp-sb-title">Route Intelligence</div>
+        <div class="mp-sb-sub">Live analysis · Updated 30s ago</div>
+      </div>
+      <!-- Score -->
+      <div class="mp-score-big">
+        <div class="msb-top">
+          <div><div class="msb-score">87</div><div class="msb-score-lbl">Overall Safety Score</div></div>
+          <div class="msb-badge">🛡 High Safety<br><span style="font-size:.7rem;font-weight:400">Route A Selected</span></div>
+        </div>
+        <div class="score-breakdown">
+          <div class="sb-row"><div class="sb-top"><span>Safety Index</span><span style="color:var(--c-teal)">92%</span></div><div class="sb-bar"><div class="sb-fill sf-teal" style="width:92%"></div></div></div>
+          <div class="sb-row"><div class="sb-top"><span>Traffic Flow</span><span style="color:var(--c-gold)">64%</span></div><div class="sb-bar"><div class="sb-fill sf-gold" style="width:64%"></div></div></div>
+          <div class="sb-row"><div class="sb-top"><span>Accident Risk</span><span style="color:var(--c-red)">28%</span></div><div class="sb-bar"><div class="sb-fill sf-red" style="width:28%"></div></div></div>
+          <div class="sb-row"><div class="sb-top"><span>Road Quality</span><span style="color:#3b82f6">81%</span></div><div class="sb-bar"><div class="sb-fill sf-blue" style="width:81%"></div></div></div>
+        </div>
+      </div>
+      <!-- Layer Toggles -->
+      <div class="mp-sb-section">
+        <div class="mp-sb-sec-title">Map Layers</div>
+        <div class="layer-toggles">
+          <div class="lt-row on" onclick="toggleLayer(this)">
+            <div class="lt-left"><div class="lt-icon">🔥</div><div><div class="lt-name">Traffic Heatmap</div><div class="lt-sub">Live congestion density</div></div></div>
+            <button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.closest('.lt-row').classList.toggle('on')"></button>
+          </div>
+          <div class="lt-row on" onclick="toggleLayer(this)">
+            <div class="lt-left"><div class="lt-icon">⚠️</div><div><div class="lt-name">Accident Zones</div><div class="lt-sub">Historical hotspots</div></div></div>
+            <button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.closest('.lt-row').classList.toggle('on')"></button>
+          </div>
+          <div class="lt-row on" onclick="toggleLayer(this)">
+            <div class="lt-left"><div class="lt-icon">🛣️</div><div><div class="lt-name">Speed Limits</div><div class="lt-sub">Road type detection</div></div></div>
+            <button class="toggle on" onclick="event.stopPropagation();this.classList.toggle('on');this.closest('.lt-row').classList.toggle('on')"></button>
+          </div>
+          <div class="lt-row" onclick="toggleWeatherLayer(this)">
+            <div class="lt-left"><div class="lt-icon">🌧️</div><div><div class="lt-name">Weather Overlay</div><div class="lt-sub">Current conditions</div></div></div>
+            <button class="toggle" onclick="event.stopPropagation(); toggleWeatherLayer(this.closest('.lt-row'))"></button>
+          </div>
+          <div class="lt-row" onclick="toggleLayer(this)">
+            <div class="lt-left"><div class="lt-icon">🚧</div><div><div class="lt-name">Construction Zones</div><div class="lt-sub">Diversions & potholes</div></div></div>
+            <button class="toggle" onclick="event.stopPropagation();this.classList.toggle('on');this.closest('.lt-row').classList.toggle('on')"></button>
+          </div>
+        </div>
+      </div>
+      <!-- Alerts -->
+      <div class="mp-alerts">
+        <div class="mp-sb-sec-title">Active Alerts on Route</div>
+        <div class="alert-item">
+          <div class="alert-icon ai-red">⚠️</div>
+          <div class="alert-info"><h5>Accident-Prone Zone · Km 4.2</h5><p>Jubilee Hills flyover — 14 incidents in last 6 months. Risk: Moderate. Reduce speed to 40 km/h.</p></div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon ai-gold">🚦</div>
+          <div class="alert-info"><h5>Heavy Traffic · Road No. 45</h5><p>30% slower than usual. Peak hour congestion. Expected delay: +6 mins.</p></div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon ai-teal">✅</div>
+          <div class="alert-info"><h5>Weather: Clear · No Impact</h5><p>Visibility excellent. No weather-related safety concerns on this route.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Big Map -->
+    <div class="mp-map">
+      <div id="map-main" class="leaflet-map"></div>
+      <!-- HUD -->
+      <div class="mp-hud">
+        <div class="mp-hud-left">
+          <div class="mp-hud-chip"><div class="hc-dot hcd-r"></div>Heavy · Kukatpally</div>
+          <div class="mp-hud-chip"><div class="hc-dot hcd-a"></div>2 Alerts</div>
+          <div class="mp-hud-chip"><div class="hc-dot hcd-g"></div>Live</div>
+        </div>
+        <div class="mp-hud-right">
+          <div class="mp-eta-head">Route A · ETA</div>
+          <div class="mp-eta-val">22 min</div>
+          <div class="mp-eta-sub">11.4 km · Fare ₹89–₹105</div>
+          <div class="mp-eta-pills">
+            <span class="ep ep-g">Safety 87</span>
+            <span class="ep ep-a">1 Alert</span>
+            <span class="ep ep-b" id="weather-ind">☁️ Partly Cloudy</span>
+          </div>
+        </div>
+      </div>
+      <!-- Legend -->
+      <div class="mp-legend">
+        <div class="ml-title">Map Legend</div>
+        <div class="ml-items">
+          <div class="ml-item"><div class="ml-swatch" style="background:linear-gradient(90deg,var(--c-navy),#2563eb,#22c55e)"></div>Recommended Route</div>
+          <div class="ml-item"><div class="ml-swatch" style="background:var(--c-gold);opacity:.7"></div>Alternate Route</div>
+          <div class="ml-item"><div class="ml-swatch" style="background:var(--c-red);border-radius:50%;width:10px;height:10px"></div>Accident Zone</div>
+          <div class="ml-item"><div class="ml-swatch" style="background:rgba(201,54,54,.3)"></div>High Traffic</div>
+          <div class="ml-item"><div class="ml-swatch" style="background:rgba(212,137,10,.3)"></div>Moderate Traffic</div>
+          <div class="ml-item"><div class="ml-swatch" style="background:rgba(11,122,106,.3)"></div>Clear Road</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SAFETY PAGE
+══════════════════════════════════ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="../js/script.js"></script>
+<script>
+let weatherLayer = null;
+
+function toggleWeatherLayer(rowEl) {
+  rowEl.classList.toggle('on');
+  const btn = rowEl.querySelector('.toggle');
+  btn.classList.toggle('on');
+  
+  const mapInstance = maps.main;
+  if (!mapInstance) return;
+
+  if (btn.classList.contains('on')) {
+    weatherLayer = L.layerGroup().addTo(mapInstance);
+    
+    // Animated Rain Zones
+    L.circle([17.4328, 78.4011], {
+      color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 0.4, radius: 1200
+    }).addTo(weatherLayer).bindPopup("🌧️ Heavy Rain Expected");
+
+    L.circle([17.4200, 78.4400], {
+      color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 0.2, radius: 2500
+    }).addTo(weatherLayer);
+
+    L.circle([17.4435, 78.3772], {
+      color: '#F5A623', fillColor: '#F5A623', fillOpacity: 0.3, radius: 800
+    }).addTo(weatherLayer).bindPopup("⚠️ Waterlogging reported");
+    
+    document.getElementById('weather-ind').innerHTML = '🌧️ Rain Alert';
+    document.getElementById('weather-ind').className = 'ep ep-r';
+    
+  } else {
+    if(weatherLayer) {
+      mapInstance.removeLayer(weatherLayer);
+      weatherLayer = null;
+    }
+    document.getElementById('weather-ind').innerHTML = '☁️ Partly Cloudy';
+    document.getElementById('weather-ind').className = 'ep ep-b';
+  }
+}
+</script>
+</body>
+</html>
+

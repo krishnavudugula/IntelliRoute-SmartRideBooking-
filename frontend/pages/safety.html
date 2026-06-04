@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IntelliRoute - Safety</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="../styles/styles.css"/>
+</head>
+<body data-page="safety">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <span class="tb-item"><div class="tb-dot"></div><b>Live</b> · Traffic Data Active</span>
+    <span class="tb-item">📍 Hyderabad · Bengaluru · Mumbai · Delhi</span>
+    <span class="tb-item">🛡️ <b>2,847</b> Safe Routes Delivered Today</span>
+  </div>
+  <span class="tb-right">Become a Driver Partner →</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nl-mark">iR</div>
+    <span class="nl-name">Intelli<span>Route</span></span>
+  </div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('home',this)">Home</button>
+    <button onclick="showPage('book',this)">Book a Ride</button>
+    <button onclick="showPage('map',this)">Route Map</button>
+    <button onclick="showPage('safety',this)">Safety</button>
+    <button onclick="showPage('driver',this)">For Drivers</button>
+    <button onclick="showPage('about',this)">About</button>
+  </div>
+  <div class="nav-cta">
+    <button class="btn-outline-sm">Sign In</button>
+    <button class="btn-fill-sm" onclick="showPage('book')">Book Now</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     HOME PAGE
+══════════════════════════════════ -->
+<div class="page active" id="page-safety">
+  <section class="safety-hero">
+    <div class="sh-bg"></div>
+    <div class="sh-inner">
+      <div>
+        <div class="s-eyebrow">Safety Intelligence</div>
+        <h1 class="s-h1">A score that<br><em>could save your life.</em></h1>
+        <p class="s-body">Our proprietary 7-factor algorithm generates a live safety score for every possible route — updated every 30 seconds from real-time and historical data sources.</p>
+        <div style="display:flex;gap:14px;margin-top:32px;flex-wrap:wrap">
+          <button class="btn-gold" onclick="showPage('book')">Book a Safe Ride →</button>
+          <button class="btn-secondary">Download Safety Report</button>
+        </div>
+      </div>
+      <div class="big-score-wrap">
+        <div class="big-score-ring">
+          <svg width="240" height="240" viewBox="0 0 240 240">
+            <defs>
+              <linearGradient id="bsrGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0B7A6A"/>
+                <stop offset="100%" stop-color="#2DD4BF"/>
+              </linearGradient>
+            </defs>
+            <circle class="bsr-track" cx="120" cy="120" r="110"/>
+            <circle class="bsr-fill" cx="120" cy="120" r="110"/>
+          </svg>
+          <div class="bsr-center"><div class="bsr-num">87</div><div class="bsr-lbl">/ 100 Safety Score</div></div>
+        </div>
+        <div class="score-attrs-grid">
+          <div class="sa"><div class="sa-ico">🛡️</div><div class="sa-v">Zero</div><div class="sa-l">Accidents Today</div></div>
+          <div class="sa"><div class="sa-ico">⚡</div><div class="sa-v">22 min</div><div class="sa-l">ETA</div></div>
+          <div class="sa"><div class="sa-ico">🌤️</div><div class="sa-v">Clear</div><div class="sa-l">Weather Impact</div></div>
+          <div class="sa"><div class="sa-ico">🚦</div><div class="sa-v">8</div><div class="sa-l">Signals on Route</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="s-eyebrow reveal">The 7 Factors</div>
+      <h2 class="s-h1 reveal">What goes into<br>your <em>safety score.</em></h2>
+      <p class="s-body reveal">Seven carefully weighted signals, analysed in under 300ms, to produce a single reliable score you can trust.</p>
+      <div class="factors-grid">
+        <div class="factor-card reveal"><div class="fc-num">01</div><div class="fc-icon-wrap" style="background:rgba(59,130,246,.1)">🔥</div><div class="fc-title">Peak-Hour Congestion</div><div class="fc-desc">12 months of historical traffic pattern analysis to predict exact congestion on your route at the time of travel.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">02</div><div class="fc-icon-wrap" style="background:var(--c-red-bg)">⚠️</div><div class="fc-title">Accident Zone Proximity</div><div class="fc-desc">Distance-weighted scoring from government accident records. Zones with higher incident frequency penalise the route score.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">03</div><div class="fc-icon-wrap" style="background:rgba(96,165,250,.1)">🌧️</div><div class="fc-title">Weather Impact</div><div class="fc-desc">Live integration with OpenWeatherMap. Rain, fog, and storm conditions apply dynamic safety penalties in real-time.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">04</div><div class="fc-icon-wrap" style="background:var(--c-teal-bg)">🛣️</div><div class="fc-title">Road Surface Quality</div><div class="fc-desc">Crowdsourced and government road quality ratings flagging pothole zones, damaged surfaces, and unmaintained stretches.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">05</div><div class="fc-icon-wrap" style="background:var(--c-gold-bg)">🚧</div><div class="fc-title">Construction Diversions</div><div class="fc-desc">Active construction zones sourced from municipal APIs, with automatic rerouting to avoid unexpected delays.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">06</div><div class="fc-icon-wrap" style="background:rgba(139,92,246,.1)">🚦</div><div class="fc-title">Intersection Density</div><div class="fc-desc">Routes with higher intersection and signal counts are flagged as stop-heavy, giving users a complete picture of the journey.</div></div>
+        <div class="factor-card reveal"><div class="fc-num">07</div><div class="fc-icon-wrap" style="background:rgba(14,13,12,.06)">🌙</div><div class="fc-title">Night Visibility Index</div><div class="fc-desc">Street lighting density and night-time safety scoring, especially relevant for late-evening and early-morning rides.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Accident zones table -->
+  <section class="section" style="background:var(--c-white);padding-top:0">
+    <div class="wrap">
+      <div class="s-eyebrow reveal">Live Data</div>
+      <h2 class="s-h1 reveal">Accident-Prone Zones<br><em>in Hyderabad.</em></h2>
+      <div class="zones-table reveal">
+        <div class="zt-head">
+          <span>Location</span><span>Incidents (6mo)</span><span>Road Type</span><span>Risk Level</span><span>Speed Advisory</span>
+        </div>
+        <div class="zt-row"><div><div class="zt-name">Jubilee Hills Flyover</div><div class="zt-sub">Road No. 45 intersection</div></div><div style="font-weight:700;font-family:'DM Mono',monospace">23</div><div style="font-size:.82rem;color:var(--c-ink2)">Urban Arterial</div><div><span class="risk-pill rp-high">High</span></div><div style="font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600">40 km/h</div></div>
+        <div class="zt-row"><div><div class="zt-name">KPHB Colony Junction</div><div class="zt-sub">NH65 merge point</div></div><div style="font-weight:700;font-family:'DM Mono',monospace">17</div><div style="font-size:.82rem;color:var(--c-ink2)">Highway Merge</div><div><span class="risk-pill rp-high">High</span></div><div style="font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600">30 km/h</div></div>
+        <div class="zt-row"><div><div class="zt-name">Mehdipatnam X Roads</div><div class="zt-sub">Masab Tank Road</div></div><div style="font-weight:700;font-family:'DM Mono',monospace">14</div><div style="font-size:.82rem;color:var(--c-ink2)">Urban Junction</div><div><span class="risk-pill rp-med">Medium</span></div><div style="font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600">40 km/h</div></div>
+        <div class="zt-row"><div><div class="zt-name">Gachibowli Signal</div><div class="zt-sub">ISB Road T-junction</div></div><div style="font-weight:700;font-family:'DM Mono',monospace">9</div><div style="font-size:.82rem;color:var(--c-ink2)">Tech Corridor</div><div><span class="risk-pill rp-med">Medium</span></div><div style="font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600">50 km/h</div></div>
+        <div class="zt-row"><div><div class="zt-name">LB Nagar Underpass</div><div class="zt-sub">ORR Connector</div></div><div style="font-weight:700;font-family:'DM Mono',monospace">6</div><div style="font-size:.82rem;color:var(--c-ink2)">Underpass</div><div><span class="risk-pill rp-low">Low</span></div><div style="font-family:'DM Mono',monospace;font-size:.82rem;font-weight:600">60 km/h</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner"><div class="cta-inner"><h2 class="cta-h2 reveal">Ride with confidence.</h2><p class="cta-p reveal">Every route is safety-scored before you book.</p><div class="cta-btns reveal"><button class="btn-gold" onclick="showPage('book')">🚀 Book a Safe Ride</button><button class="btn-secondary" onclick="showPage('map')">🗺️ View Route Map</button></div></div></div>
+  <footer style="background:var(--c-ink);padding:28px 52px"><div class="f-bottom" style="border-top:none;padding-top:0"><p class="f-copy">© 2025 IntelliRoute Technologies</p><div class="f-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a></div></div></footer>
+</div>
+
+<!-- ══════════════════════════════════
+     DRIVER PAGE
+══════════════════════════════════ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="../js/script.js"></script>
+
+<!-- EMERGENCY SOS OVERLAY -->
+<div id="sos-modal" class="modal-overlay" style="z-index:9999;">
+  <div class="modal-box" style="text-align:center; background:var(--c-red); color:white; border:4px solid #fff;">
+    <div style="font-size:3rem; margin-bottom:10px;">🚨</div>
+    <div class="modal-title" style="color:white; font-size:1.5rem;">Emergency Mode Activated</div>
+    <div class="modal-subtitle" style="color:rgba(255,255,255,0.8); margin-bottom:16px;">Live location shared with 3 trusted contacts & authorities. Audio recording started.</div>
+    <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:20px;">
+      <div style="font-size:.85rem; font-weight:600; margin-bottom:6px;">Current Location Broadcast:</div>
+      <div style="font-family:monospace; font-size:1.1rem; letter-spacing:1px;">17.9689° N, 79.5941° E</div>
+    </div>
+    <button class="modal-btn" style="background:white; color:var(--c-red); box-shadow:var(--sh-md);" onclick="document.getElementById('sos-modal').classList.remove('active'); alert('Emergency Mode Deactivated.')">Cancel SOS (Hold 3s)</button>
+  </div>
+</div>
+
+</body>
+</html>
+

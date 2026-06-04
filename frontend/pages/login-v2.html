@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>IntelliRoute - Login / Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/styles.css"/>
+    <style>
+        body {
+            background: linear-gradient(135deg, #F8F7F3 0%, #FAFAF8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 12px 40px rgba(30, 64, 94, 0.12);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .logo-mark {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 22px;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1E405E;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .auth-subtitle {
+            color: #5F5F5F;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            background: #F8F7F3;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #5F5F5F;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #1E405E;
+            box-shadow: 0 2px 8px rgba(30, 64, 94, 0.1);
+        }
+
+        .role-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .role-hint {
+            color: #5F5F5F;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .role-switch {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            padding: 5px;
+            margin-bottom: 16px;
+            border: 1px solid #E1E7EC;
+            border-radius: 999px;
+            background: #EEF3F7;
+            overflow: hidden;
+        }
+
+        .role-slider {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(50% - 5px);
+            height: calc(100% - 10px);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            box-shadow: 0 6px 16px rgba(30, 64, 94, 0.2);
+            transition: transform 0.25s ease;
+        }
+
+        .role-switch.driver .role-slider {
+            transform: translateX(100%);
+        }
+
+        .role-option {
+            position: relative;
+            z-index: 1;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            padding: 10px 12px;
+            color: #5F5F5F;
+            font-weight: 800;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .role-option.active {
+            color: #ffffff;
+        }
+
+        .driver-route-card {
+            display: none;
+            margin: 4px 0 18px;
+            padding: 16px;
+            border: 1px solid #CDE8E1;
+            border-radius: 12px;
+            background: #F0FAF7;
+        }
+
+        .driver-route-card.show {
+            display: block;
+        }
+
+        .driver-route-card h3 {
+            margin: 0 0 7px;
+            color: #1E405E;
+            font-size: 16px;
+        }
+
+        .driver-route-card p {
+            margin: 0 0 12px;
+            color: #5F5F5F;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .driver-route-card button {
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 12px;
+            background: #1E405E;
+            color: #ffffff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #2D2D2D;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #E8E7E3;
+            border-radius: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #C58A2A;
+            box-shadow: 0 0 0 3px rgba(197, 138, 42, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-row input {
+            width: 100%;
+        }
+
+        .error-message {
+            color: #DC3545;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #F8F7F3;
+            border-top: 3px solid #C58A2A;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1E405E 0%, #1F7B6D 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 64, 94, 0.2);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #5F5F5F;
+        }
+
+        .form-footer a {
+            color: #C58A2A;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background: #D4EDDA;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <!-- Logo -->
+    <div class="logo-section">
+        <div class="logo">
+            <div class="logo-mark">iR</div>
+            <div class="logo-text">IntelliRoute</div>
+        </div>
+        <div class="auth-subtitle">Ride with confidence</div>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form" class="auth-form">
+        <div class="success-message" id="login-success">✅ Logged in! Redirecting...</div>
+        <div class="error-message" id="login-error"></div>
+        
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="login-email" required placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="submit-btn" id="login-submit">Login</button>
+        
+        <div class="form-footer">
+            <a onclick="switchTab('register')">Don't have an account? Register</a>
+        </div>
+
+        <div class="loading" id="login-loading">
+            <div class="spinner"></div>
+            <p>Logging in...</p>
+        </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="register-form" class="auth-form hidden">
+        <div class="error-message" id="register-error"></div>
+
+        <div class="form-group">
+            <div class="role-label">
+                <label>Register As</label>
+                <span class="role-hint">Slide to choose account type</span>
+            </div>
+            <div class="role-switch" id="register-role-switch">
+                <span class="role-slider"></span>
+                <button type="button" class="role-option active" data-role="commuter" onclick="setRegisterRole('commuter')">Commuter</button>
+                <button type="button" class="role-option" data-role="driver" onclick="setRegisterRole('driver')">Driver</button>
+            </div>
+            <div class="driver-route-card" id="driver-route-card">
+                <h3>Driver registration has its own page</h3>
+                <p>Drivers need vehicle and license details, so this continues in the dedicated driver signup flow.</p>
+                <button type="button" onclick="window.location.href='/pages/driver-signup.html'">Continue to Driver Signup</button>
+            </div>
+        </div>
+
+        <div id="commuter-register-fields">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="register-first-name" required placeholder="John">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="register-last-name" required placeholder="Doe">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="register-email" required placeholder="you@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="register-phone" required placeholder="+91 98765 43210">
+            </div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="register-username" required placeholder="johndoe">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="register-password" required placeholder="••••••••" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="register-confirm" required placeholder="••••••••">
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="register-submit">Create Commuter Account</button>
+
+        <div class="form-footer">
+            <a onclick="switchTab('login')">Already have an account? Login</a>
+        </div>
+
+        <div class="loading" id="register-loading">
+            <div class="spinner"></div>
+            <p>Creating account...</p>
+        </div>
+    </form>
+</div>
+
+<script src="../js/app-state.js"></script>
+<script src="../js/auth-guard.js"></script>
+<script src="../js/api-v2.js"></script>
+
+<script>
+const initialParams = new URLSearchParams(window.location.search);
+const requestedTab = initialParams.get('tab');
+const requestedRole = initialParams.get('role');
+const wantsRegisterSetup = requestedTab === 'register' || requestedRole === 'driver' || requestedRole === 'commuter';
+
+// Check if already logged in
+if (AppState.isLoggedIn()) {
+    if (requestedRole === 'driver') {
+        window.location.href = '/pages/driver-signup.html';
+    } else if (!wantsRegisterSetup) {
+        routeAfterLogin();
+    }
+}
+
+async function routeAfterLogin() {
+    const driver = await getDriverProfile();
+    window.location.href = driver ? '/pages/driver-dashboard.html' : '/pages/dashboard.html';
+}
+
+let selectedRegisterRole = 'commuter';
+
+function setRegisterRole(role) {
+    selectedRegisterRole = role;
+    const switchEl = document.getElementById('register-role-switch');
+    const driverCard = document.getElementById('driver-route-card');
+    const commuterFields = document.getElementById('commuter-register-fields');
+    const submitBtn = document.getElementById('register-submit');
+
+    switchEl.classList.toggle('driver', role === 'driver');
+    document.querySelectorAll('.role-option').forEach(option => {
+        option.classList.toggle('active', option.dataset.role === role);
+    });
+
+    driverCard.classList.toggle('show', role === 'driver');
+    commuterFields.classList.toggle('hidden', role === 'driver');
+    commuterFields.querySelectorAll('input').forEach(input => {
+        input.disabled = role === 'driver';
+    });
+    submitBtn.textContent = role === 'driver' ? 'Continue to Driver Signup' : 'Create Commuter Account';
+}
+
+function switchTab(tab) {
+    // Hide all forms
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.add('hidden');
+    
+    // Remove active class from buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected form and activate button
+    if (tab === 'login') {
+        document.getElementById('login-form').classList.remove('hidden');
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    } else {
+        document.getElementById('register-form').classList.remove('hidden');
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    }
+}
+
+// LOGIN HANDLER
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const errorEl = document.getElementById('login-error');
+    const loadingEl = document.getElementById('login-loading');
+    const successEl = document.getElementById('login-success');
+    
+    errorEl.classList.remove('show');
+    successEl.classList.remove('show');
+    loadingEl.style.display = 'none';
+    
+    try {
+        loadingEl.style.display = 'block';
+        document.getElementById('login-submit').disabled = true;
+        
+        await loginUser(email, password);
+        
+        successEl.classList.add('show');
+        setTimeout(routeAfterLogin, 700);
+    } catch (err) {
+        loadingEl.style.display = 'none';
+        document.getElementById('login-submit').disabled = false;
+        errorEl.textContent = '❌ ' + err.message;
+        errorEl.classList.add('show');
+    }
+});
+
+// REGISTER HANDLER
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (selectedRegisterRole === 'driver') {
+        window.location.href = '/pages/driver-signup.html';
+        return;
+    }
+    
+    const firstName = document.getElementById('register-first-name').value;
+    const lastName = document.getElementById('register-last-name').value;
+    const email = document.getElementById('register-email').value;
+    const phone = document.getElementById('register-phone').value;
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
+    const confirm = document.getElementById('register-confirm').value;
+    
+    const errorEl = document.getElementById('register-error');
+    const loadingEl = document.getElementById('register-loading');
+    
+    errorEl.classList.remove('show');
+    
+    // Validate
+    if (password !== confirm) {
+        errorEl.textContent = '❌ Passwords do not match';
+        errorEl.classList.add('show');
+        return;
+    }
+    
+    if (password.length < 6) {
+        errorEl.textContent = '❌ Password must be at least 6 characters';
+        errorEl.classList.add('show');
+        return;
+    }
+    
+    try {
+        loadingEl.style.display = 'block';
+        document.getElementById('register-submit').disabled = true;
+        
+        await registerUser({
+            username,
+            email,
+            phone,
+            first_name: firstName,
+            last_name: lastName,
+            password
+        });
+        
+        // Success - redirect to commuter dashboard
+        setTimeout(() => {
+            window.location.href = '/pages/dashboard.html';
+        }, 500);
+    } catch (err) {
+        loadingEl.style.display = 'none';
+        document.getElementById('register-submit').disabled = false;
+        errorEl.textContent = '❌ ' + err.message;
+        errorEl.classList.add('show');
+    }
+});
+
+if (requestedTab === 'register') {
+    switchTab('register');
+}
+if (requestedRole === 'driver') {
+    switchTab('register');
+    setRegisterRole('driver');
+}
+if (requestedRole === 'commuter') {
+    switchTab('register');
+    setRegisterRole('commuter');
+}
+</script>
+
+</body>
+</html>
