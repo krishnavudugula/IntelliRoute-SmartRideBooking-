@@ -662,6 +662,17 @@ function renderRides(rides) {
     const container = document.getElementById('rides-container');
     setText('queue-count', `${rides ? rides.length : 0} request${rides && rides.length === 1 ? '' : 's'}`);
 
+    // Save existing OTP inputs and focus
+    const activeElement = document.activeElement;
+    const activeId = activeElement && activeElement.id ? activeElement.id : null;
+    const selectionStart = activeElement ? activeElement.selectionStart : null;
+    const selectionEnd = activeElement ? activeElement.selectionEnd : null;
+
+    const otpValues = {};
+    container.querySelectorAll('input[id^="otp-"]').forEach(input => {
+        otpValues[input.id] = input.value;
+    });
+
     if (!rides || rides.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -672,7 +683,29 @@ function renderRides(rides) {
         return;
     }
 
-    container.innerHTML = rides.map(ride => rideCardTemplate(ride)).join('');
+    const newHTML = rides.map(ride => rideCardTemplate(ride)).join('');
+    if (container.innerHTML !== newHTML) {
+        container.innerHTML = newHTML;
+    }
+
+    // Restore OTP inputs and focus
+    container.querySelectorAll('input[id^="otp-"]').forEach(input => {
+        if (otpValues[input.id] !== undefined && document.activeElement !== input) {
+            input.value = otpValues[input.id];
+        }
+    });
+
+    if (activeId) {
+        const toFocus = document.getElementById(activeId);
+        if (toFocus) {
+            toFocus.focus();
+            if (selectionStart !== null && selectionEnd !== null) {
+                try {
+                    toFocus.setSelectionRange(selectionStart, selectionEnd);
+                } catch(e) {}
+            }
+        }
+    }
 }
 
 function rideCardTemplate(ride) {
